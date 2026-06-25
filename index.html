@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>General Work Productivity Prompt Library</title>
+  <link rel="icon" href="data:," />
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("clawpilotTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      line-height: 1.5;
+    }
+    .shell { max-width: 1180px; margin: 0 auto; padding: 32px 20px 56px; }
+    .hero {
+      background: var(--cp-panel-strong);
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      box-shadow: var(--cp-shadow);
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    .eyebrow {
+      color: var(--cp-accent);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 0.78rem;
+      margin: 0 0 8px;
+    }
+    h1 { font-size: clamp(2rem, 4vw, 3.4rem); line-height: 1.05; margin: 0; }
+    .lede { color: var(--cp-text-muted); font-size: 1.08rem; max-width: 780px; margin: 16px 0 0; }
+    .stats { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+    .stat {
+      border: 1px solid var(--cp-border);
+      background: var(--cp-surface-soft);
+      border-radius: 0.625rem;
+      padding: 10px 14px;
+      color: var(--cp-text-muted);
+      font-size: 0.92rem;
+    }
+    .stat strong { color: var(--cp-text); }
+    .controls {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto;
+      gap: 12px;
+      margin: 22px 0;
+      align-items: center;
+    }
+    .search {
+      width: 100%;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      padding: 12px 14px;
+      font: inherit;
+    }
+    .filterRow { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip, button {
+      border: 1px solid var(--cp-border);
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      border-radius: 0.625rem;
+      padding: 10px 12px;
+      font: inherit;
+      cursor: pointer;
+    }
+    .chip.active, .copyBtn {
+      background: var(--cp-accent);
+      border-color: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      font-weight: 700;
+    }
+    .chip:hover, button:hover { border-color: var(--cp-border-strong); }
+    .copyBtn:hover { background: var(--cp-accent-hover); border-color: var(--cp-accent-hover); }
+    .section { margin-top: 34px; }
+    .sectionHead { display: flex; justify-content: space-between; gap: 16px; align-items: end; margin-bottom: 14px; }
+    h2 { margin: 0; font-size: 1.45rem; }
+    .sectionDesc { color: var(--cp-text-muted); margin: 4px 0 0; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .card {
+      background: var(--cp-surface);
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      box-shadow: var(--cp-shadow);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 220px;
+    }
+    .cardTop { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 0.625rem;
+      background: var(--cp-accent-soft);
+      color: var(--cp-accent);
+      padding: 4px 9px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .title { font-weight: 700; font-size: 1rem; margin: 0; }
+    .prompt {
+      white-space: pre-wrap;
+      background: var(--cp-surface-soft);
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      color: var(--cp-text);
+      padding: 14px;
+      margin: 0;
+      flex: 1;
+      font-size: 0.96rem;
+    }
+    .meta { color: var(--cp-text-muted); font-size: 0.86rem; margin: 0; }
+    .empty { display: none; border: 1px dashed var(--cp-border-strong); border-radius: 16px; padding: 28px; text-align: center; color: var(--cp-text-muted); background: var(--cp-surface); }
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      background: var(--cp-panel-strong);
+      color: var(--cp-text);
+      border: 1px solid var(--cp-border);
+      box-shadow: var(--cp-shadow);
+      border-radius: 0.625rem;
+      padding: 12px 14px;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 160ms ease, transform 160ms ease;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .hidden { display: none; }
+    @media (max-width: 780px) {
+      .hero { padding: 24px; }
+      .controls { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: 1fr; }
+      .sectionHead { align-items: flex-start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <p class="eyebrow">Microsoft Copilot Chat</p>
+      <h1>General Work Productivity Prompt Library</h1>
+      <p class="lede">A customer-shareable collection of ready-to-run prompts for everyday communication, planning, analysis, writing, and decision support. Browse by category, search for a use case, then click copy to paste a prompt into Microsoft Copilot Chat.</p>
+      <div class="stats" aria-label="Prompt library summary">
+        <div class="stat"><strong id="promptCount">43</strong> prompts</div>
+        <div class="stat"><strong>10</strong> categories</div>
+        <div class="stat"><strong>1-click</strong> copy</div>
+      </div>
+    </section>
+
+    <section class="controls" aria-label="Search and filters">
+      <input class="search" id="search" type="search" placeholder="Search prompts, e.g. email, meeting, data, customer, checklist" />
+      <div class="filterRow" id="filters"></div>
+    </section>
+
+    <div id="sections"></div>
+    <div class="empty" id="emptyState">No prompts match that search or filter.</div>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite">Prompt copied</div>
+
+  <script>
+    const prompts = [
+      { group: "General Work Productivity", category: "General Work Productivity", title: "Summarize into key points", text: "Summarize this text into 5 key points: [Add content or upload file]" },
+      { group: "General Work Productivity", category: "General Work Productivity", title: "Rewrite clearly and concisely", text: "Rewrite this to be clearer and more concise: [Add content or upload file]" },
+      { group: "General Work Productivity", category: "Email & Communication", title: "Professional tone email", text: "Draft a professional tone email to [Name] using this: [Add content or upload file]" },
+      { group: "General Work Productivity", category: "Learning & Understanding", title: "Plain-language overview", text: "Give me a quick overview of this topic in plain language: [Add content or upload file]" },
+      { group: "General Work Productivity", category: "Planning & Organization", title: "Short action plan", text: "Create a short action plan based on this: [Add content or upload file]" },
+      { group: "General Work Productivity", category: "Problem Solving & Decision Support", title: "Key risks", text: "What are the key risks in this scenario? [Add scenario or upload file]" },
+
+      { group: "Email & Communication", category: "Email & Communication", title: "Professional email with clear ask", text: "Draft a professional email to [Audience] about [Topic] with a clear ask." },
+      { group: "Email & Communication", category: "Email & Communication", title: "Friendlier professional email", text: "Make this email more friendly but still professional: [Email selected in Outlook]" },
+      { group: "Email & Communication", category: "Email & Communication", title: "Shorten email", text: "Shorten this email while keeping the main message: [Email Draft in view]" },
+      { group: "Email & Communication", category: "Email & Communication", title: "Status follow-up email", text: "Write a follow-up email checking on status of [Project/Request]." },
+      { group: "Email & Communication", category: "Email & Communication", title: "Polite decline response", text: "Create a response declining this request politely: [Request details]" },
+
+      { group: "Meeting Prep & Notes", category: "Meeting Prep & Notes", title: "Meeting agenda", text: "Create a meeting agenda for [Topic] with clear objectives." },
+      { group: "Meeting Prep & Notes", category: "Meeting Prep & Notes", title: "Organized meeting minutes", text: "Turn these notes into organized meeting minutes: [Notes/file]" },
+      { group: "Meeting Prep & Notes", category: "Meeting Prep & Notes", title: "Questions to ask", text: "What questions should I ask in a meeting about [Topic]?" },
+      { group: "Meeting Prep & Notes", category: "Meeting Prep & Notes", title: "Summarize notes with actions", text: "Summarize these meeting notes and highlight decisions and action items: [Notes or file]" },
+      { group: "Meeting Prep & Notes", category: "Meeting Prep & Notes", title: "Discussion next steps", text: "Create a list of next steps from this discussion: [Notes/text/file]" },
+
+      { group: "Data & Analysis", category: "Data & Analysis (Non-technical)", title: "Explain data simply", text: "Explain what this data means in simple terms: [Paste data or upload file]" },
+      { group: "Data & Analysis", category: "Data & Analysis (Non-technical)", title: "Trends and patterns", text: "What trends or patterns might be important here? [Data description or upload file]" },
+      { group: "Data & Analysis", category: "Data & Analysis (Non-technical)", title: "Three to five insights", text: "Give me 3-5 insights from this information: [Data description or upload file]" },
+      { group: "Data & Analysis", category: "Data & Analysis (Non-technical)", title: "Additional data needed", text: "What additional data would help make a better decision here? [Scenario or upload file]" },
+
+      { group: "Problem Solving & Decision Support", category: "Problem Solving & Decision Support", title: "Think through options", text: "Help me think through options for this situation: [Describe scenario]" },
+      { group: "Problem Solving & Decision Support", category: "Problem Solving & Decision Support", title: "Decision pros and cons", text: "List pros and cons of this decision: [Decision or file]" },
+      { group: "Problem Solving & Decision Support", category: "Problem Solving & Decision Support", title: "Three approaches", text: "What are 3 different ways to approach this problem: [Problem or file]" },
+      { group: "Problem Solving & Decision Support", category: "Problem Solving & Decision Support", title: "Failure reasons", text: "If this fails, what are possible reasons why? [Plan, idea, file]" },
+      { group: "Problem Solving & Decision Support", category: "Problem Solving & Decision Support", title: "Step-by-step plan", text: "What would a simple step-by-step plan look like for this? [Goal or file]" },
+
+      { group: "Writing & Content Creation", category: "Writing & Content Creation", title: "Short content summary", text: "Create a short summary for this content: [Text or File]" },
+      { group: "Writing & Content Creation", category: "Writing & Content Creation", title: "Turn into bullet points", text: "Turn this into bullet points: [Text or File]" },
+      { group: "Writing & Content Creation", category: "Writing & Content Creation", title: "Rewrite for non-technical audience", text: "Rewrite this for a non-technical audience: [Text or File]" },
+      { group: "Writing & Content Creation", category: "Writing & Content Creation", title: "One-page overview", text: "Create a quick one-page overview of [Text or File]" },
+      { group: "Writing & Content Creation", category: "Writing & Content Creation", title: "Three message versions", text: "Generate 3 different versions of this message: [Text or File]" },
+
+      { group: "Learning & Understanding", category: "Learning & Understanding", title: "Explain for a beginner", text: "Explain this concept like I'm new to it: [Text or File]" },
+      { group: "Learning & Understanding", category: "Learning & Understanding", title: "Key terms", text: "What are the key terms I should understand about [Text or File]?" },
+      { group: "Learning & Understanding", category: "Learning & Understanding", title: "Break down step-by-step", text: "Break this down step-by-step: [Process, Concept, or File]" },
+      { group: "Learning & Understanding", category: "Learning & Understanding", title: "Real-world example", text: "Give me a real-world example of this: [Concept]" },
+
+      { group: "Planning & Organization", category: "Planning & Organization", title: "Simple project timeline", text: "Create a simple timeline for completing [Project or goal]." },
+      { group: "Planning & Organization", category: "Planning & Organization", title: "Missing tasks", text: "What tasks are missing from this plan? [Plan or file]" },
+      { group: "Planning & Organization", category: "Planning & Organization", title: "Checklist", text: "Turn this into a checklist: [Text, process, or file]" },
+
+      { group: "Customer / External Scenarios", category: "Customer / External Scenarios", title: "Customer response", text: "Draft a response to a customer asking about [Topic or file]." },
+      { group: "Customer / External Scenarios", category: "Customer / External Scenarios", title: "Customer-friendly explanation", text: "Simplify this explanation so a customer would understand it: [Text or file]" },
+      { group: "Customer / External Scenarios", category: "Customer / External Scenarios", title: "Customer talking points", text: "Create talking points for explaining [Topic or file] to a customer." },
+
+      { group: "Quick Thinking Prompts", category: "Quick Thinking Prompts", title: "What am I missing?", text: "What am I not thinking about in this situation? [Scenario]" },
+      { group: "Quick Thinking Prompts", category: "Quick Thinking Prompts", title: "Reviewer questions", text: "If you were reviewing this, what would you question? [Plan or File]" },
+      { group: "Quick Thinking Prompts", category: "Quick Thinking Prompts", title: "Sanity check", text: "Give me a quick sanity check on this idea: [Idea]" }
+    ];
+
+    const groupDescriptions = {
+      "General Work Productivity": "Everyday prompts for summarizing, rewriting, planning, and risk spotting.",
+      "Email & Communication": "Prompts for drafting, improving, shortening, and responding to messages.",
+      "Meeting Prep & Notes": "Prompts for agendas, minutes, questions, summaries, and next steps.",
+      "Data & Analysis": "Non-technical prompts for explaining data, finding patterns, and identifying decision gaps.",
+      "Problem Solving & Decision Support": "Prompts for options, tradeoffs, approaches, failure modes, and action plans.",
+      "Writing & Content Creation": "Prompts for summaries, bullets, audience rewrites, overviews, and message variants.",
+      "Learning & Understanding": "Prompts for learning new concepts, terms, processes, and examples.",
+      "Planning & Organization": "Prompts for timelines, task gaps, and checklists.",
+      "Customer / External Scenarios": "Prompts for customer-ready responses, explanations, and talking points.",
+      "Quick Thinking Prompts": "Fast prompts for checking blind spots, questions, and idea quality."
+    };
+
+    const sectionsEl = document.getElementById("sections");
+    const filtersEl = document.getElementById("filters");
+    const searchEl = document.getElementById("search");
+    const toastEl = document.getElementById("toast");
+    const emptyEl = document.getElementById("emptyState");
+    const promptCountEl = document.getElementById("promptCount");
+    let activeCategory = "All";
+
+    const categories = ["All", ...Array.from(new Set(prompts.map(prompt => prompt.category)))];
+    promptCountEl.textContent = prompts.length;
+
+    filtersEl.innerHTML = categories.map(category =>
+      `<button class="chip${category === "All" ? " active" : ""}" type="button" data-category="${escapeAttr(category)}">${escapeHtml(category)}</button>`
+    ).join("");
+
+    filtersEl.addEventListener("click", event => {
+      const button = event.target.closest("button[data-category]");
+      if (!button) return;
+      activeCategory = button.dataset.category;
+      document.querySelectorAll(".chip").forEach(chip => chip.classList.toggle("active", chip === button));
+      render();
+    });
+
+    searchEl.addEventListener("input", render);
+
+    sectionsEl.addEventListener("click", async event => {
+      const button = event.target.closest("button[data-copy]");
+      if (!button) return;
+      const prompt = prompts[Number(button.dataset.copy)];
+      await navigator.clipboard.writeText(prompt.text);
+      const original = button.textContent;
+      button.textContent = "Copied";
+      showToast(`Copied: ${prompt.title}`);
+      setTimeout(() => { button.textContent = original; }, 1200);
+    });
+
+    function render() {
+      const query = searchEl.value.trim().toLowerCase();
+      const filtered = prompts.filter(prompt => {
+        const matchesCategory = activeCategory === "All" || prompt.category === activeCategory;
+        const haystack = `${prompt.group} ${prompt.category} ${prompt.title} ${prompt.text}`.toLowerCase();
+        return matchesCategory && (!query || haystack.includes(query));
+      });
+
+      const groups = Array.from(new Set(prompts.map(prompt => prompt.group)));
+      sectionsEl.innerHTML = groups.map(group => {
+        const groupPrompts = filtered.filter(prompt => prompt.group === group);
+        if (!groupPrompts.length) return "";
+        return `
+          <section class="section">
+            <div class="sectionHead">
+              <div>
+                <h2>${escapeHtml(group)}</h2>
+                <p class="sectionDesc">${escapeHtml(groupDescriptions[group] || "")}</p>
+              </div>
+              <span class="stat"><strong>${groupPrompts.length}</strong> shown</span>
+            </div>
+            <div class="grid">
+              ${groupPrompts.map(prompt => card(prompt, prompts.indexOf(prompt))).join("")}
+            </div>
+          </section>`;
+      }).join("");
+
+      emptyEl.style.display = filtered.length ? "none" : "block";
+    }
+
+    function card(prompt, index) {
+      return `
+        <article class="card">
+          <div class="cardTop">
+            <div>
+              <span class="tag">${escapeHtml(prompt.category)}</span>
+              <p class="title">${escapeHtml(prompt.title)}</p>
+            </div>
+            <button class="copyBtn" type="button" data-copy="${index}" aria-label="Copy prompt: ${escapeAttr(prompt.title)}">Copy</button>
+          </div>
+          <p class="prompt">${escapeHtml(prompt.text)}</p>
+          <p class="meta">Paste into Microsoft Copilot Chat and replace bracketed placeholders with your context.</p>
+        </article>`;
+    }
+
+    function showToast(message) {
+      toastEl.textContent = message;
+      toastEl.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toastEl.classList.remove("show"), 1800);
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]));
+    }
+
+    function escapeAttr(value) { return escapeHtml(value); }
+
+    render();
+  </script>
+</body>
+</html>
