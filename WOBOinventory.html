@@ -299,14 +299,23 @@ function cartMailtoHref() {
     return `mailto:${CART_EMAIL}?subject=${encodeURIComponent(CART_SUBJECT)}`;
   }
   let href = `mailto:${CART_EMAIL}?subject=${encodeURIComponent(CART_SUBJECT)}&body=${encodeURIComponent(cartEmailBody(rows, true))}`;
-  const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  if (isIos && href.length > 1800) {
+  if (isMobileDevice() && href.length > 1800) {
     href = `mailto:${CART_EMAIL}?subject=${encodeURIComponent(CART_SUBJECT)}&body=${encodeURIComponent(cartEmailBody(rows, false))}`;
   }
   return href;
 }
+function cartOutlookHref() {
+  const rows = cartRows();
+  const fullBody = rows.length ? cartEmailBody(rows, true) : '';
+  const compactBody = rows.length ? cartEmailBody(rows, false) : '';
+  const body = fullBody && `ms-outlook://compose?to=${encodeURIComponent(CART_EMAIL)}&subject=${encodeURIComponent(CART_SUBJECT)}&body=${encodeURIComponent(fullBody)}`.length <= 1800 ? fullBody : compactBody;
+  return `ms-outlook://compose?to=${encodeURIComponent(CART_EMAIL)}&subject=${encodeURIComponent(CART_SUBJECT)}&body=${encodeURIComponent(body)}`;
+}
+function isMobileDevice() {
+  return /iPad|iPhone|iPod|Android/i.test(navigator.userAgent);
+}
 function prepareEmailLink() {
-  emailCart.href = cartEmailHref();
+  emailCart.href = isMobileDevice() ? cartOutlookHref() : cartMailtoHref();
 }
 function emailCartList(event) {
   if (!cartRows().length) {
@@ -316,6 +325,15 @@ function emailCartList(event) {
     return;
   }
   prepareEmailLink();
+  if (isMobileDevice()) {
+    event.preventDefault();
+    window.location.href = cartOutlookHref();
+    setTimeout(() => {
+      if (document.visibilityState === 'visible') {
+        window.location.href = cartMailtoHref();
+      }
+    }, 900);
+  }
 }
 function renderDetail() {
   const model = DATA.models.find(m => m.model === selectedModel) || brandModels(selectedBrand)[0];
