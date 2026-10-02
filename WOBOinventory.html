@@ -121,7 +121,7 @@ h1 { margin: 8px 0; font-size: clamp(28px, 4vw, 50px); line-height: 1; }
 .gallery img { max-width:100%; max-height:48px; object-fit:contain; }
 .cart-panel { margin-top: 18px; padding: 14px; display: grid; grid-template-columns: 1fr auto auto auto; gap: 10px; align-items: center; background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px; box-shadow: 0 0 2px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14); }
 .cart-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-.cart-button, .cart-secondary { padding: 10px 12px; border: 1px solid var(--cp-accent); border-radius: 0.625rem; background: var(--cp-accent); color: var(--cp-accent-fg); cursor: pointer; font-weight: 700; }
+.cart-button, .cart-secondary { padding: 10px 12px; border: 1px solid var(--cp-accent); border-radius: 0.625rem; background: var(--cp-accent); color: var(--cp-accent-fg); cursor: pointer; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
 .cart-secondary { border-color: var(--cp-border); background: var(--cp-surface-soft); color: var(--cp-text); }
 .cart-details { grid-column: 1 / -1; display: none; border-top: 1px solid var(--cp-border); padding-top: 12px; }
 .cart-details.open { display: block; }
@@ -152,7 +152,7 @@ h1 { margin: 8px 0; font-size: clamp(28px, 4vw, 50px); line-height: 1; }
     <div><strong id="cartSummary">Quote cart is empty</strong></div>
     <div class="cart-actions">
       <button class="cart-secondary" id="toggleCart" type="button">Review Cart</button>
-      <button class="cart-button" id="emailCart" type="button">Email List</button>
+      <a class="cart-button" id="emailCart" href="mailto:TheCrew@WOBO.store?subject=Hat%20Selection%20for%20order">Email List</a>
       <button class="cart-secondary" id="clearCart" type="button">Clear</button>
     </div>
     <div class="cart-details" id="cartDetails"></div>
@@ -272,13 +272,7 @@ function updateCartPanel() {
     renderDetail();
   }));
 }
-function emailCartList() {
-  const rows = cartRows();
-  if (!rows.length) {
-    cartDetails.classList.add('open');
-    updateCartPanel();
-    return;
-  }
+function cartEmailBody(rows, includeImageLinks = true) {
   const units = rows.reduce((sum, item) => sum + Number(item.qty || 0), 0);
   const lines = rows.map(item => [
     `Qty: ${item.qty}`,
@@ -287,10 +281,10 @@ function emailCartList() {
     `Color: ${item.colorCode} - ${item.color}`,
     `Model/Color: ${item.model}-${item.colorCode}`,
     `Price with Leather Patch: ${item.price}`,
-    `Image: ${cartImage(item)}`,
+    includeImageLinks ? `Image: ${cartImage(item)}` : '',
     item.itemNumbers ? `Item number: ${item.itemNumbers}` : ''
   ].filter(Boolean).join('\n'));
-  const body = [
+  return [
     'WOBO Custom Hats quote request',
     '',
     `Total items: ${rows.length}`,
@@ -298,7 +292,30 @@ function emailCartList() {
     '',
     lines.join('\n\n')
   ].join('\n');
-  window.location.href = `mailto:${CART_EMAIL}?subject=${encodeURIComponent(CART_SUBJECT)}&body=${encodeURIComponent(body)}`;
+}
+function cartMailtoHref() {
+  const rows = cartRows();
+  if (!rows.length) {
+    return `mailto:${CART_EMAIL}?subject=${encodeURIComponent(CART_SUBJECT)}`;
+  }
+  let href = `mailto:${CART_EMAIL}?subject=${encodeURIComponent(CART_SUBJECT)}&body=${encodeURIComponent(cartEmailBody(rows, true))}`;
+  const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  if (isIos && href.length > 1800) {
+    href = `mailto:${CART_EMAIL}?subject=${encodeURIComponent(CART_SUBJECT)}&body=${encodeURIComponent(cartEmailBody(rows, false))}`;
+  }
+  return href;
+}
+function prepareEmailLink() {
+  emailCart.href = cartEmailHref();
+}
+function emailCartList(event) {
+  if (!cartRows().length) {
+    event.preventDefault();
+    cartDetails.classList.add('open');
+    updateCartPanel();
+    return;
+  }
+  prepareEmailLink();
 }
 function renderDetail() {
   const model = DATA.models.find(m => m.model === selectedModel) || brandModels(selectedBrand)[0];
@@ -352,6 +369,8 @@ toggleCart.addEventListener('click', () => {
   cartDetails.classList.toggle('open');
   updateCartPanel();
 });
+emailCart.addEventListener('pointerdown', prepareEmailLink);
+emailCart.addEventListener('touchstart', prepareEmailLink, { passive: true });
 emailCart.addEventListener('click', emailCartList);
 clearCart.addEventListener('click', () => {
   cart = {};
