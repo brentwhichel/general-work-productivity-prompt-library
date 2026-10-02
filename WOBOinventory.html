@@ -181,8 +181,36 @@ const toggleCart = document.getElementById('toggleCart');
 const emailCart = document.getElementById('emailCart');
 const clearCart = document.getElementById('clearCart');
 let cart = loadCart();
+const IMG_PLACEHOLDER = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%22120%22 viewBox=%220 0 120 120%22%3E%3Crect width=%22120%22 height=%22120%22 fill=%22%23f5f5f5%22/%3E%3C/svg%3E';
+const imageObserver = 'IntersectionObserver' in window ? new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    const image = entry.target;
+    if (image.dataset.src) {
+      image.src = image.dataset.src;
+      delete image.dataset.src;
+    }
+    imageObserver.unobserve(image);
+  });
+}, { rootMargin: '250px' }) : null;
 function esc(v) { return String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function fmt(n) { return Number(n || 0).toLocaleString(); }
+function lazyImg(src, alt, className = '') {
+  const safeSrc = esc(src || '');
+  const safeAlt = esc(alt || '');
+  const cls = className ? ` class="${esc(className)}"` : '';
+  return `<img${cls} loading="lazy" src="${IMG_PLACEHOLDER}" data-src="${safeSrc}" alt="${safeAlt}">`;
+}
+function initLazyImages(root = document) {
+  root.querySelectorAll('img[data-src]').forEach(image => {
+    if (imageObserver) {
+      imageObserver.observe(image);
+    } else {
+      image.src = image.dataset.src;
+      delete image.dataset.src;
+    }
+  });
+}
 function metrics() {
   const s = DATA.summary;
   document.getElementById('metrics').innerHTML = [
@@ -207,11 +235,12 @@ function renderModels() {
   const q = modelSearch.value.toLowerCase();
   const models = brandModels(selectedBrand).filter(m => !q || `${m.model} ${m.name}`.toLowerCase().includes(q));
   if (!selectedModel && models.length) selectedModel = models[0].model;
-  modelList.innerHTML = models.map(m => `<button class="rowbtn model-row ${m.model === selectedModel ? 'active' : ''}" data-model="${esc(m.model)}"><img class="model-thumb" loading="lazy" src="${esc(m.mainImage)}" alt="${esc(m.name)}"><span class="model-row-text"><strong>${esc(m.model)}</strong><span>${esc(m.name)}</span><span class="rowmeta">${fmt(m.colorCount)} colors · ${fmt(m.totalInventory)} units</span></span></button>`).join('') || '<div class="empty">No models found.</div>';
+  modelList.innerHTML = models.map(m => `<button class="rowbtn model-row ${m.model === selectedModel ? 'active' : ''}" data-model="${esc(m.model)}">${lazyImg(m.mainImage, m.name, 'model-thumb')}<span class="model-row-text"><strong>${esc(m.model)}</strong><span>${esc(m.name)}</span><span class="rowmeta">${fmt(m.colorCount)} colors · ${fmt(m.totalInventory)} units</span></span></button>`).join('') || '<div class="empty">No models found.</div>';
+  initLazyImages(modelList);
   modelList.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => { selectedModel = btn.dataset.model; renderAll(false); }));
 }
 function swatches(hexColors) { return `<div class="swatches">${(hexColors || []).map(h => `<span style="background-color:#${esc(h)}"></span>`).join('')}</div>`; }
-function gallery(images, name) { return `<div class="gallery">${(images || []).map((img, i) => `<a class="gallery-thumb ${i === 0 ? 'active' : ''}" href="${esc(img.zoom || img.large || img.thumb)}" data-large="${esc(img.large || img.zoom || img.thumb)}" data-zoom="${esc(img.zoom || img.large || img.thumb)}"><img loading="lazy" src="${esc(img.thumb || img.large || img.zoom)}" alt="${esc(name)} view ${i+1}"></a>`).join('')}</div>`; }
+function gallery(images, name) { return `<div class="gallery">${(images || []).map((img, i) => `<a class="gallery-thumb ${i === 0 ? 'active' : ''}" href="${esc(img.zoom || img.large || img.thumb)}" data-large="${esc(img.large || img.zoom || img.thumb)}" data-zoom="${esc(img.zoom || img.large || img.thumb)}">${lazyImg(img.thumb || img.large || img.zoom, `${name} view ${i+1}`)}</a>`).join('')}</div>`; }
 function inventoryDisplay(c) { return c.inventory <= 0 ? '<strong class="out-of-stock">Out of Stock</strong>' : `<strong>${esc(c.inventoryHtml || c.inventory)}</strong>`; }
 function numericPrice(value) { return Number(String(value ?? '').replace(/[^0-9.]/g, '')) || 0; }
 function displayPrice(item) {
@@ -265,7 +294,8 @@ function updateCartPanel() {
   const rows = cartRows();
   const units = rows.reduce((sum, item) => sum + Number(item.qty || 0), 0);
   cartSummary.textContent = rows.length ? `${fmt(units)} total hats` : 'Quote cart is empty';
-  cartDetails.innerHTML = rows.length ? `<table><thead><tr><th>Image</th><th>Qty</th><th>Brand</th><th>Model</th><th>Color</th><th>Price</th><th></th></tr></thead><tbody>${rows.map(item => `<tr><td>${cartImage(item) ? `<img class="cart-thumb" src="${esc(cartImage(item))}" alt="${esc(item.model)} ${esc(item.color)}">` : ''}</td><td><strong>${fmt(item.qty)}</strong></td><td>${esc(item.brand)}</td><td>${esc(item.model)}<br><span class="rowmeta">${esc(item.modelName)}</span></td><td>${esc(item.color)}<br><span class="rowmeta">${esc(item.colorCode)}${item.itemNumbers ? ` · ${esc(item.itemNumbers)}` : ''}</span></td><td>${esc(item.price)}</td><td><button class="cart-secondary remove-cart-item" type="button" data-key="${esc(item.key)}">Remove</button></td></tr>`).join('')}</tbody></table>` : '<div class="cart-empty">No items added yet.</div>';
+  cartDetails.innerHTML = rows.length ? `<table><thead><tr><th>Image</th><th>Qty</th><th>Brand</th><th>Model</th><th>Color</th><th>Price</th><th></th></tr></thead><tbody>${rows.map(item => `<tr><td>${cartImage(item) ? lazyImg(cartImage(item), `${item.model} ${item.color}`, 'cart-thumb') : ''}</td><td><strong>${fmt(item.qty)}</strong></td><td>${esc(item.brand)}</td><td>${esc(item.model)}<br><span class="rowmeta">${esc(item.modelName)}</span></td><td>${esc(item.color)}<br><span class="rowmeta">${esc(item.colorCode)}${item.itemNumbers ? ` · ${esc(item.itemNumbers)}` : ''}</span></td><td>${esc(item.price)}</td><td><button class="cart-secondary remove-cart-item" type="button" data-key="${esc(item.key)}">Remove</button></td></tr>`).join('')}</tbody></table>` : '<div class="cart-empty">No items added yet.</div>';
+  initLazyImages(cartDetails);
   cartDetails.querySelectorAll('.remove-cart-item').forEach(button => button.addEventListener('click', () => {
     delete cart[button.dataset.key];
     saveCart();
@@ -357,7 +387,8 @@ function renderDetail() {
     });
     colors.sort((a,b) => sortColor.value === 'name' ? a.description.localeCompare(b.description) : sortColor.value === 'inventoryDesc' ? b.inventory - a.inventory : sortColor.value === 'inventoryAsc' ? a.inventory - b.inventory : 0);
     document.getElementById('colorCount').textContent = `${colors.length} of ${model.colors.length} colors shown`;
-    document.getElementById('colorGrid').innerHTML = colors.map(c => `<article class="card"><div class="card-img"><img class="color-main" loading="lazy" src="${esc(c.mainImage)}" data-zoom="${esc(c.zoomImage || c.mainImage)}" alt="${esc(c.description)}"></div><div class="card-body"><h3>${esc(c.description)}</h3><div class="code">${esc(model.model)}-${esc(c.colorCode)}</div>${swatches(c.hexColors)}<div class="info"><div class="infobox"><span>Inventory</span>${inventoryDisplay(c)}</div><div class="infobox"><span>Size/items</span><strong>${esc((c.items || []).length || 1)}</strong></div></div><div class="info"><div class="infobox wide"><span>Price with Leather Patch</span><strong>${esc(displayPrice(c))}</strong></div></div><div class="cart-entry"><label><span class="qty-label">Quantity to quote</span><input class="qty-input" type="number" min="0" max="${esc(c.inventory)}" step="1" value="${esc(cart[cartKey(model, c)]?.qty || '')}" data-cart-key="${esc(cartKey(model, c))}" ${c.inventory <= 0 ? 'disabled' : ''}></label><button class="cart-add" type="button" data-cart-key="${esc(cartKey(model, c))}" ${c.inventory <= 0 ? 'disabled' : ''}>Add / Update</button></div><div class="badges">${c.closeoutOnly ? '<span class="badge warn">Closeout only</span>' : ''}${c.preSell ? '<span class="badge warn">Pre-sell</span>' : ''}</div>${gallery(c.images, c.description)}</div></article>`).join('') || '<div class="empty">No colors found.</div>';
+    document.getElementById('colorGrid').innerHTML = colors.map(c => `<article class="card"><div class="card-img">${lazyImg(c.mainImage, c.description, 'color-main')}<span class="zoom-data" data-zoom="${esc(c.zoomImage || c.mainImage)}"></span></div><div class="card-body"><h3>${esc(c.description)}</h3><div class="code">${esc(model.model)}-${esc(c.colorCode)}</div>${swatches(c.hexColors)}<div class="info"><div class="infobox"><span>Inventory</span>${inventoryDisplay(c)}</div><div class="infobox"><span>Size/items</span><strong>${esc((c.items || []).length || 1)}</strong></div></div><div class="info"><div class="infobox wide"><span>Price with Leather Patch</span><strong>${esc(displayPrice(c))}</strong></div></div><div class="cart-entry"><label><span class="qty-label">Quantity to quote</span><input class="qty-input" type="number" min="0" max="${esc(c.inventory)}" step="1" value="${esc(cart[cartKey(model, c)]?.qty || '')}" data-cart-key="${esc(cartKey(model, c))}" ${c.inventory <= 0 ? 'disabled' : ''}></label><button class="cart-add" type="button" data-cart-key="${esc(cartKey(model, c))}" ${c.inventory <= 0 ? 'disabled' : ''}>Add / Update</button></div><div class="badges">${c.closeoutOnly ? '<span class="badge warn">Closeout only</span>' : ''}${c.preSell ? '<span class="badge warn">Pre-sell</span>' : ''}</div>${gallery(c.images, c.description)}</div></article>`).join('') || '<div class="empty">No colors found.</div>';
+    initLazyImages(document.getElementById('colorGrid'));
     const colorByKey = new Map(colors.map(c => [cartKey(model, c), c]));
     document.getElementById('colorGrid').querySelectorAll('.cart-add').forEach(button => button.addEventListener('click', () => {
       const input = button.closest('.cart-entry')?.querySelector('.qty-input');
@@ -371,12 +402,14 @@ function renderDetail() {
       const image = card?.querySelector('.color-main');
       if (!image) return;
       image.src = thumb.dataset.large || thumb.href;
+      delete image.dataset.src;
       image.dataset.zoom = thumb.dataset.zoom || thumb.href;
       thumb.closest('.gallery')?.querySelectorAll('.gallery-thumb').forEach(item => item.classList.remove('active'));
       thumb.classList.add('active');
     }));
     document.getElementById('colorGrid').querySelectorAll('.color-main').forEach(image => image.addEventListener('click', () => {
-      window.open(image.dataset.zoom || image.src, 'hatZoomWindow', 'popup=yes,width=1100,height=900,left=120,top=80,resizable=yes,scrollbars=yes,noopener,noreferrer');
+      const zoom = image.dataset.zoom || image.closest('.card-img')?.querySelector('.zoom-data')?.dataset.zoom || image.dataset.src || image.src;
+      window.open(zoom, 'hatZoomWindow', 'popup=yes,width=1100,height=900,left=120,top=80,resizable=yes,scrollbars=yes,noopener,noreferrer');
     }));
   }
   colorSearch.addEventListener('input', drawColors); stockFilter.addEventListener('change', drawColors); sortColor.addEventListener('change', drawColors); drawColors();
