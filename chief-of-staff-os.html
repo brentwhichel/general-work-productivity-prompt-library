@@ -695,7 +695,6 @@ Example: Flag sensitive issues, but do not escalate them without approval.</text
 
           <article class="card prompt-card">
             <div>
-              <span class="tag">Optional hardening</span>
               <h3>Prompt 1B: Ask Cowork to challenge the constitution</h3>
               <p class="hint">Why it matters: strong operating systems need explicit gaps, escalation rules, and definitions of success.</p>
             </div>
@@ -877,7 +876,7 @@ Example: Flag sensitive issues, but do not escalate them without approval.</text
     };
 
     const templates = {
-      constitutionPrompt: () => `You are my Chief of Staff for ${state.executiveName}, Executive of ${state.company}.
+      constitutionPrompt: () => `You are my Chief of Staff within ${state.company}.
 
 Your responsibility is to help me stay focused on the highest-value work, especially customer commitments, customer meetings, executive engagements, commitments I have made to other people, and the business priorities below:
 
