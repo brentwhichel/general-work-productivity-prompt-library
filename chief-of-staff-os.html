@@ -601,8 +601,10 @@
           <label>Important people / stakeholders
             <textarea data-var="stakeholders">[CUSTOMERS_EXECUTIVES_BOARD_MEMBERS_PARTNERS]</textarea>
           </label>
-          <label>Decision rights and guardrails
-            <textarea data-var="guardrails">[WHAT_COWORK_CAN_PREPARE_VERSUS_WHAT_REQUIRES_EXECUTIVE_APPROVAL]</textarea>
+          <label>Set limits and guardrails
+            <textarea data-var="guardrails">Example: Draft emails for me, but do not send them.
+Example: Recommend meeting changes, but do not move meetings without approval.
+Example: Flag sensitive issues, but do not escalate them without approval.</textarea>
           </label>
         </div>
         <p class="hint">Change these fields and every prompt updates automatically. The placeholders remain visible if the Executive wants to fill them in later.</p>
@@ -871,7 +873,7 @@
       company: "[COMPANY]",
       priorities: "[TOP_3_TO_5_BUSINESS_PRIORITIES]",
       stakeholders: "[CUSTOMERS_EXECUTIVES_BOARD_MEMBERS_PARTNERS]",
-      guardrails: "[WHAT_COWORK_CAN_PREPARE_VERSUS_WHAT_REQUIRES_EXECUTIVE_APPROVAL]"
+      guardrails: "Example: Draft emails for me, but do not send them.\nExample: Recommend meeting changes, but do not move meetings without approval.\nExample: Flag sensitive issues, but do not escalate them without approval."
     };
 
     const templates = {
