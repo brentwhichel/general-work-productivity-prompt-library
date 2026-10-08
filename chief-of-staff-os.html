@@ -485,6 +485,25 @@
       min-height: 1.25rem;
     }
 
+    .setup-note {
+      border: 1px solid var(--cp-border);
+      border-left: 4px solid var(--cp-accent);
+      border-radius: 0.625rem;
+      background: var(--cp-surface-soft);
+      padding: 12px 14px;
+    }
+
+    .setup-note h4 {
+      margin: 0 0 6px;
+      font-size: 0.92rem;
+    }
+
+    .setup-note p {
+      color: var(--cp-text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 0;
+    }
+
     .checklist {
       list-style: none;
       padding: 0;
@@ -770,8 +789,8 @@ Example: Flag sensitive issues, but do not escalate them without approval.</text
           <div class="card why">
             <span class="tag">Step 3</span>
             <h2 id="rhythm-title">Install the first operating rhythm</h2>
-            <p>The first meeting should end with a repeatable loop, not just good prompts. Convert the jobs into a daily and meeting-based rhythm so Cowork watches for the right things at the right time.</p>
-            <p class="route"><strong>Where to go in Cowork:</strong> use Cowork's automation or recurring workflow area for scheduled watch loops. Use the Chief of Staff OS thread as the home base and save the best prompts as reusable skills or templates when available.</p>
+            <p>The first meeting should end with a repeatable loop, not just good prompts. The prompts below help Cowork design the recurring work, but they do not automatically turn on the automation. After Cowork returns the recurring prompt and schedule, create the automation manually in Cowork.</p>
+            <p class="route"><strong>Where to go in Cowork:</strong> first use the <strong>Chief of Staff OS</strong> thread to generate the automation prompt. Then go to Cowork's <strong>Automations</strong> or recurring workflow area, create a new automation, paste in the approved recurring prompt, set the schedule, and enable it.</p>
           </div>
 
           <div class="two-col">
@@ -802,6 +821,10 @@ Example: Flag sensitive issues, but do not escalate them without approval.</text
               <button class="btn primary copy-btn">Copy prompt</button>
               <span class="copy-status" aria-live="polite"></span>
             </div>
+            <div class="setup-note">
+              <h4>After Cowork answers: set up the automation</h4>
+              <p>Go to Cowork <strong>Automations</strong> → create a new automation → name it <strong>Morning Chief of Staff Brief</strong> → paste the recurring prompt Cowork generated → schedule it for each workday before the Executive starts the day → save and enable it.</p>
+            </div>
           </article>
 
           <article class="card prompt-card">
@@ -815,6 +838,10 @@ Example: Flag sensitive issues, but do not escalate them without approval.</text
               <button class="btn primary copy-btn">Copy prompt</button>
               <span class="copy-status" aria-live="polite"></span>
             </div>
+            <div class="setup-note">
+              <h4>After Cowork answers: create the meeting automations</h4>
+              <p>Go to Cowork <strong>Automations</strong> → create one automation for <strong>Before-meeting Chief of Staff Briefs</strong> and one for <strong>After-meeting follow-through</strong>. Paste the generated prompts, set the trigger timing around important meetings, define what counts as important, and keep approval required for messages, meeting changes, or commitments.</p>
+            </div>
           </article>
 
           <article class="card prompt-card">
@@ -827,6 +854,10 @@ Example: Flag sensitive issues, but do not escalate them without approval.</text
             <div class="prompt-actions">
               <button class="btn primary copy-btn">Copy prompt</button>
               <span class="copy-status" aria-live="polite"></span>
+            </div>
+            <div class="setup-note">
+              <h4>Use this before enabling broadly</h4>
+              <p>Run the test in the Chief of Staff OS thread first. If the brief misses context, over-prioritizes the wrong items, or needs permissions, fix the prompt before turning on the recurring automations.</p>
             </div>
           </article>
         </section>
