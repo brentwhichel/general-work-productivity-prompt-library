@@ -114,6 +114,86 @@
       padding: 28px;
     }
 
+    .brand-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .brand-lockup {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-surface);
+      color: var(--cp-text-muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 6px 9px;
+    }
+
+    .microsoft-mark {
+      display: grid;
+      grid-template-columns: repeat(2, 7px);
+      grid-template-rows: repeat(2, 7px);
+      gap: 2px;
+      width: 16px;
+      height: 16px;
+      color: var(--cp-accent);
+    }
+
+    .microsoft-mark span,
+    .copilot-mark span {
+      background: currentColor;
+      display: block;
+    }
+
+    .microsoft-mark span {
+      border-radius: 2px;
+    }
+
+    .copilot-mark {
+      display: inline-grid;
+      grid-template-columns: repeat(2, 9px);
+      grid-template-rows: repeat(2, 9px);
+      gap: 0;
+      width: 18px;
+      height: 18px;
+      color: var(--cp-accent);
+      transform: rotate(45deg);
+    }
+
+    .copilot-mark span {
+      border: 1px solid var(--cp-surface);
+    }
+
+    .copilot-mark span:nth-child(1) {
+      border-radius: 8px 2px 2px 2px;
+    }
+
+    .copilot-mark span:nth-child(2) {
+      border-radius: 2px 8px 2px 2px;
+      opacity: 0.82;
+    }
+
+    .copilot-mark span:nth-child(3) {
+      border-radius: 2px 2px 2px 8px;
+      opacity: 0.72;
+    }
+
+    .copilot-mark span:nth-child(4) {
+      border-radius: 2px 2px 8px 2px;
+      opacity: 0.9;
+    }
+
+    .copilot-label {
+      display: inline-block;
+      transform: translateY(0);
+    }
+
     .eyebrow {
       color: var(--cp-accent);
       font-size: 0.82rem;
@@ -486,9 +566,19 @@
   <div class="app">
     <section class="hero">
       <div class="hero-copy panel">
+        <div class="brand-row" aria-label="Microsoft and Copilot">
+          <div class="brand-lockup" aria-label="Microsoft">
+            <span class="microsoft-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+            <span>Microsoft</span>
+          </div>
+          <div class="brand-lockup" aria-label="Copilot">
+            <span class="copilot-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+            <span class="copilot-label">Copilot</span>
+          </div>
+        </div>
         <p class="eyebrow">Cowork Chief of Staff Builder</p>
-        <h1>Build a CIO operating system, not another chatbot.</h1>
-        <p class="lede">This page walks a CIO through the first working session: write the Chief of Staff constitution, choose the first jobs, and install the daily operating rhythm in Cowork. Each prompt is copy-ready and uses placeholders that can be customized before pasting.</p>
+        <h1>Build an Executive operating system, not another chatbot.</h1>
+        <p class="lede">This page walks an Executive through the first working session: write the Chief of Staff constitution, choose the first jobs, and install the daily operating rhythm in Cowork. Each prompt is copy-ready and uses placeholders that can be customized before pasting.</p>
         <div class="hero-actions">
           <button class="btn primary" data-jump="constitution">Start with Step 1</button>
           <button class="btn" data-jump="model">Edit the operating model</button>
@@ -497,10 +587,10 @@
 
       <aside class="customizer panel" aria-label="Prompt placeholder editor">
         <p class="eyebrow">Customize once</p>
-        <h2>Your CIO context</h2>
+        <h2>Your Executive context</h2>
         <div class="field-grid">
-          <label>CIO name
-            <input data-var="cioName" value="[CIO_NAME]">
+          <label>Executive name
+            <input data-var="executiveName" value="[EXECUTIVE_NAME]">
           </label>
           <label>Company / organization
             <input data-var="company" value="[COMPANY]">
@@ -512,10 +602,10 @@
             <textarea data-var="stakeholders">[CUSTOMERS_EXECUTIVES_BOARD_MEMBERS_PARTNERS]</textarea>
           </label>
           <label>Decision rights and guardrails
-            <textarea data-var="guardrails">[WHAT_COWORK_CAN_PREPARE_VERSUS_WHAT_REQUIRES_CIO_APPROVAL]</textarea>
+            <textarea data-var="guardrails">[WHAT_COWORK_CAN_PREPARE_VERSUS_WHAT_REQUIRES_EXECUTIVE_APPROVAL]</textarea>
           </label>
         </div>
-        <p class="hint">Change these fields and every prompt updates automatically. The placeholders remain visible if the CIO wants to fill them in later.</p>
+        <p class="hint">Change these fields and every prompt updates automatically. The placeholders remain visible if the Executive wants to fill them in later.</p>
       </aside>
     </section>
 
@@ -533,7 +623,7 @@
           <div class="card">
             <span class="tag">Mindset</span>
             <h2 id="model-title">The operating system Cowork should become</h2>
-            <p>Cowork acts as the Chief of Staff when it can understand context, watch for commitments and risk, then act by preparing briefs, drafts, and recommendations. The CIO stays in control of judgment calls and external commitments.</p>
+            <p>Cowork acts as the Chief of Staff when it can understand context, watch for commitments and risk, then act by preparing briefs, drafts, and recommendations. The Executive stays in control of judgment calls and external commitments.</p>
             <p class="route"><strong>Where to go in Cowork:</strong> start in a dedicated Cowork thread named <strong>Chief of Staff OS</strong>. Use Work IQ for context, Automations for recurring watch loops, and Skills for repeatable outputs such as briefs and follow-ups.</p>
             <div class="diagram" aria-label="Chief of Staff operating model">
               <div class="diagram-top">
@@ -576,7 +666,7 @@
                 </div>
               </div>
             </div>
-            <p class="hint">Every item in the diagram is editable. Click any label or list item to tailor the operating model for a specific CIO.</p>
+            <p class="hint">Every item in the diagram is editable. Click any label or list item to tailor the operating model for a specific Executive.</p>
           </div>
         </section>
 
@@ -584,7 +674,7 @@
           <div class="card why">
             <span class="tag">Step 1</span>
             <h2 id="constitution-title">Writing the Chief of Staff Constitution</h2>
-            <p>The constitution is the system prompt for the CIO's operating system. It tells Cowork what to optimize for, how to make tradeoffs, when to be candid, and where it must stop and ask for approval. Without this, Cowork will summarize activity. With it, Cowork can recommend action.</p>
+            <p>The constitution is the system prompt for the Executive's operating system. It tells Cowork what to optimize for, how to make tradeoffs, when to be candid, and where it must stop and ask for approval. Without this, Cowork will summarize activity. With it, Cowork can recommend action.</p>
             <p class="route"><strong>Where to go in Cowork:</strong> open Cowork, create a new chat, name it <strong>Chief of Staff OS</strong>, paste the prompt below, and ask Cowork to confirm how it will operate.</p>
           </div>
 
@@ -690,7 +780,7 @@
             <div class="card">
               <h3>First operating rhythm</h3>
               <ul class="checklist">
-                <li><span class="check">✓</span><span><strong>Morning:</strong> produce the executive day brief before the CIO starts work.</span></li>
+                <li><span class="check">✓</span><span><strong>Morning:</strong> produce the executive day brief before the Executive starts work.</span></li>
                 <li><span class="check">✓</span><span><strong>Before important meetings:</strong> prepare context, risks, outcomes, and likely decisions.</span></li>
                 <li><span class="check">✓</span><span><strong>After important meetings:</strong> capture promises, owners, dates, and draft follow-ups.</span></li>
                 <li><span class="check">✓</span><span><strong>End of day:</strong> identify unresolved items, missed replies, and tomorrow's landmines.</span></li>
@@ -699,7 +789,7 @@
             </div>
             <div class="card">
               <h3>Human approval rules</h3>
-              <p>Cowork can prepare, prioritize, recommend, and draft. The CIO approves external communication, customer meeting changes, executive commitments, sensitive escalations, and anything that changes ownership or accountability.</p>
+              <p>Cowork can prepare, prioritize, recommend, and draft. The Executive approves external communication, customer meeting changes, executive commitments, sensitive escalations, and anything that changes ownership or accountability.</p>
             </div>
           </div>
 
@@ -720,7 +810,7 @@
             <div>
               <span class="tag">Meeting loop</span>
               <h3>Prompt 3B: Create before-and-after meeting triggers</h3>
-              <p class="hint">Why it matters: the CIO's highest leverage moments are usually before, during, and after critical meetings.</p>
+              <p class="hint">Why it matters: the Executive's highest leverage moments are usually before, during, and after critical meetings.</p>
             </div>
             <pre data-template="meetingRhythmPrompt"></pre>
             <div class="prompt-actions">
@@ -760,7 +850,7 @@
             <div>
               <span class="tag">Weekly refinement</span>
               <h3>Prompt 4A: Improve the Chief of Staff OS</h3>
-              <p class="hint">Why it matters: every week should make the system sharper, more candid, and more aligned to the CIO's real operating model.</p>
+              <p class="hint">Why it matters: every week should make the system sharper, more candid, and more aligned to the Executive's real operating model.</p>
             </div>
             <pre data-template="weeklyRefinementPrompt"></pre>
             <div class="prompt-actions">
@@ -772,20 +862,20 @@
       </main>
     </section>
 
-    <p class="footer-note">Use this in the first CIO meeting to complete Steps 1, 2, and 3. Treat the Hill Climb section as the follow-on adoption plan.</p>
+    <p class="footer-note">Use this in the first Executive meeting to complete Steps 1, 2, and 3. Treat the Hill Climb section as the follow-on adoption plan.</p>
   </div>
 
   <script>
     const state = {
-      cioName: "[CIO_NAME]",
+      executiveName: "[EXECUTIVE_NAME]",
       company: "[COMPANY]",
       priorities: "[TOP_3_TO_5_BUSINESS_PRIORITIES]",
       stakeholders: "[CUSTOMERS_EXECUTIVES_BOARD_MEMBERS_PARTNERS]",
-      guardrails: "[WHAT_COWORK_CAN_PREPARE_VERSUS_WHAT_REQUIRES_CIO_APPROVAL]"
+      guardrails: "[WHAT_COWORK_CAN_PREPARE_VERSUS_WHAT_REQUIRES_EXECUTIVE_APPROVAL]"
     };
 
     const templates = {
-      constitutionPrompt: () => `You are my Chief of Staff for ${state.cioName}, CIO of ${state.company}.
+      constitutionPrompt: () => `You are my Chief of Staff for ${state.executiveName}, Executive of ${state.company}.
 
 Your responsibility is to help me stay focused on the highest-value work, especially customer commitments, customer meetings, executive engagements, commitments I have made to other people, and the business priorities below:
 
@@ -827,7 +917,7 @@ When you are uncertain, say what you know, what you do not know, and the fastest
 
 Confirm that you understand this constitution and tell me how you will operate as my Chief of Staff.`,
 
-      challengePrompt: () => `Review the Chief of Staff constitution we just created for ${state.cioName}.
+      challengePrompt: () => `Review the Chief of Staff constitution we just created for ${state.executiveName}.
 
 Pressure-test it like an experienced executive operator. Identify:
 1. Ambiguous instructions that could lead you to overstep.
@@ -839,11 +929,11 @@ Pressure-test it like an experienced executive operator. Identify:
 
 Return a tightened version of the constitution and a short operating checklist I can approve.`,
 
-      controlDayPrompt: () => `Use the Chief of Staff constitution for ${state.cioName}.
+      controlDayPrompt: () => `Use the Chief of Staff constitution for ${state.executiveName}.
 
 Job: Control my day.
 
-Every morning, review my calendar, recent email and Teams activity, meeting history, commitments, and known stakeholder priorities. Produce a CIO daily brief with these sections:
+Every morning, review my calendar, recent email and Teams activity, meeting history, commitments, and known stakeholder priorities. Produce an Executive daily brief with these sections:
 
 TODAY
 - Must do
@@ -884,7 +974,7 @@ Use this prioritization order unless I tell you otherwise:
 
 If information is missing, state the assumption and the fastest way to validate it.`,
 
-      meetingPrepPrompt: () => `Use the Chief of Staff constitution for ${state.cioName}.
+      meetingPrepPrompt: () => `Use the Chief of Staff constitution for ${state.executiveName}.
 
 Job: Own meeting preparation.
 
@@ -921,7 +1011,7 @@ For the brief, include:
 
 Use placeholders if a source is unavailable, but call out what is missing and why it matters.`,
 
-      followThroughPrompt: () => `Use the Chief of Staff constitution for ${state.cioName}.
+      followThroughPrompt: () => `Use the Chief of Staff constitution for ${state.executiveName}.
 
 Job: Own meeting follow-through.
 
@@ -949,7 +1039,7 @@ Do not send anything or create commitments without my explicit approval.`,
       morningAutomationPrompt: () => `Help me convert the "Control my day" job into a recurring Cowork operating rhythm.
 
 Context:
-- CIO: ${state.cioName}
+- Executive: ${state.executiveName}
 - Organization: ${state.company}
 - Priorities: ${state.priorities}
 - Critical stakeholders: ${state.stakeholders}
