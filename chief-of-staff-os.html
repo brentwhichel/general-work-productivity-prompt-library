@@ -589,9 +589,6 @@
         <p class="eyebrow">Customize once</p>
         <h2>Your Executive context</h2>
         <div class="field-grid">
-          <label>Executive name
-            <input data-var="executiveName" value="[EXECUTIVE_NAME]">
-          </label>
           <label>Company / organization
             <input data-var="company" value="[COMPANY]">
           </label>
@@ -868,7 +865,6 @@ Example: Flag sensitive issues, but do not escalate them without approval.</text
 
   <script>
     const state = {
-      executiveName: "[EXECUTIVE_NAME]",
       company: "[COMPANY]",
       priorities: "[TOP_3_TO_5_BUSINESS_PRIORITIES]",
       stakeholders: "[CUSTOMERS_EXECUTIVES_BOARD_MEMBERS_PARTNERS]",
@@ -918,7 +914,7 @@ When you are uncertain, say what you know, what you do not know, and the fastest
 
 Confirm that you understand this constitution and tell me how you will operate as my Chief of Staff.`,
 
-      challengePrompt: () => `Review the Chief of Staff constitution we just created for ${state.executiveName}.
+      challengePrompt: () => `Review the Chief of Staff constitution we just created for me.
 
 Pressure-test it like an experienced executive operator. Identify:
 1. Ambiguous instructions that could lead you to overstep.
@@ -930,7 +926,7 @@ Pressure-test it like an experienced executive operator. Identify:
 
 Return a tightened version of the constitution and a short operating checklist I can approve.`,
 
-      controlDayPrompt: () => `Use the Chief of Staff constitution for ${state.executiveName}.
+      controlDayPrompt: () => `Use the Chief of Staff constitution for me.
 
 Job: Control my day.
 
@@ -975,7 +971,7 @@ Use this prioritization order unless I tell you otherwise:
 
 If information is missing, state the assumption and the fastest way to validate it.`,
 
-      meetingPrepPrompt: () => `Use the Chief of Staff constitution for ${state.executiveName}.
+      meetingPrepPrompt: () => `Use the Chief of Staff constitution for me.
 
 Job: Own meeting preparation.
 
@@ -1012,7 +1008,7 @@ For the brief, include:
 
 Use placeholders if a source is unavailable, but call out what is missing and why it matters.`,
 
-      followThroughPrompt: () => `Use the Chief of Staff constitution for ${state.executiveName}.
+      followThroughPrompt: () => `Use the Chief of Staff constitution for me.
 
 Job: Own meeting follow-through.
 
@@ -1040,7 +1036,7 @@ Do not send anything or create commitments without my explicit approval.`,
       morningAutomationPrompt: () => `Help me convert the "Control my day" job into a recurring Cowork operating rhythm.
 
 Context:
-- Executive: ${state.executiveName}
+- Executive: me
 - Organization: ${state.company}
 - Priorities: ${state.priorities}
 - Critical stakeholders: ${state.stakeholders}
