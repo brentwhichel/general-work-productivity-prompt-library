@@ -78,6 +78,54 @@
       line-height: 1.5;
     }
 
+    body.locked {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    body.locked .app {
+      display: none;
+    }
+
+    body:not(.locked) .gate {
+      display: none;
+    }
+
+    .gate {
+      width: min(440px, 100%);
+      background: var(--cp-panel-strong);
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      box-shadow: var(--cp-shadow);
+      padding: 28px;
+    }
+
+    .gate h1 {
+      font-size: 1.7rem;
+      line-height: 1.1;
+      letter-spacing: -0.035em;
+      margin-bottom: 10px;
+    }
+
+    .gate p {
+      color: var(--cp-text-muted);
+      margin-bottom: 18px;
+    }
+
+    .gate-form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .gate-error {
+      color: var(--cp-danger);
+      font-size: 0.9rem;
+      min-height: 1.35rem;
+      margin: 0;
+    }
+
     button,
     input,
     textarea {
@@ -581,7 +629,20 @@
     }
   </style>
 </head>
-<body>
+<body class="locked">
+  <section class="gate" aria-label="Password required">
+    <p class="eyebrow">Protected page</p>
+    <h1>Enter access word</h1>
+    <p>This Chief of Staff OS page is protected for workshop use.</p>
+    <form class="gate-form" id="gateForm">
+      <label>Access word
+        <input id="gatePassword" type="password" autocomplete="current-password" autofocus>
+      </label>
+      <button class="btn primary" type="submit">Enter</button>
+      <p class="gate-error" id="gateError" aria-live="polite"></p>
+    </form>
+  </section>
+
   <div class="app">
     <section class="hero">
       <div class="hero-copy panel">
@@ -895,6 +956,35 @@ Example: Flag sensitive issues, but do not escalate them without approval.</text
   </div>
 
   <script>
+    (() => {
+      const requiredAccessWord = "WOBO";
+      const storageKey = "chief-of-staff-os-unlocked";
+      const form = document.getElementById("gateForm");
+      const input = document.getElementById("gatePassword");
+      const error = document.getElementById("gateError");
+
+      function unlock() {
+        document.body.classList.remove("locked");
+      }
+
+      if (sessionStorage.getItem(storageKey) === "true") {
+        unlock();
+      }
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (input.value.trim().toUpperCase() === requiredAccessWord) {
+          sessionStorage.setItem(storageKey, "true");
+          input.value = "";
+          error.textContent = "";
+          unlock();
+        } else {
+          error.textContent = "Incorrect access word.";
+          input.select();
+        }
+      });
+    })();
+
     const state = {
       company: "[COMPANY]",
       priorities: "[TOP_3_TO_5_BUSINESS_PRIORITIES]",
