@@ -1,0 +1,1074 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cowork Chief of Staff Operating System</title>
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.5;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      padding: 32px 20px 56px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(300px, 0.7fr);
+      gap: 24px;
+      align-items: stretch;
+      margin-bottom: 24px;
+    }
+
+    .panel {
+      background: var(--cp-panel-strong);
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      box-shadow: var(--cp-shadow);
+    }
+
+    .hero-copy,
+    .customizer {
+      padding: 28px;
+    }
+
+    .eyebrow {
+      color: var(--cp-accent);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      margin: 0 0 8px;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 4.25rem);
+      line-height: 0.95;
+      letter-spacing: -0.055em;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: clamp(1.45rem, 2.5vw, 2.15rem);
+      letter-spacing: -0.035em;
+      margin-bottom: 12px;
+    }
+
+    h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    .lede {
+      color: var(--cp-text-muted);
+      font-size: 1.06rem;
+      max-width: 64ch;
+    }
+
+    .hero-actions,
+    .step-actions,
+    .prompt-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn {
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 14px;
+      text-decoration: none;
+      transition: border-color 160ms ease, transform 160ms ease, background 160ms ease;
+    }
+
+    .btn:hover {
+      border-color: var(--cp-border-strong);
+      transform: translateY(-1px);
+    }
+
+    .btn.primary {
+      background: var(--cp-accent);
+      border-color: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      font-weight: 700;
+    }
+
+    .btn.primary:hover {
+      background: var(--cp-accent-hover);
+      border-color: var(--cp-accent-hover);
+    }
+
+    .field-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      color: var(--cp-text-muted);
+      display: grid;
+      gap: 5px;
+      font-size: 0.86rem;
+      font-weight: 600;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      padding: 10px 12px;
+      resize: vertical;
+    }
+
+    textarea {
+      min-height: 78px;
+    }
+
+    .hint {
+      color: var(--cp-text-soft);
+      font-size: 0.86rem;
+      margin: 12px 0 0;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .rail {
+      position: sticky;
+      top: 16px;
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .tab {
+      width: 100%;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      padding: 12px;
+      text-align: left;
+    }
+
+    .tab small {
+      color: var(--cp-text-muted);
+      display: block;
+      margin-top: 3px;
+    }
+
+    .tab.active {
+      background: var(--cp-accent-soft);
+      border-color: var(--cp-accent);
+    }
+
+    .stage {
+      display: none;
+    }
+
+    .stage.active {
+      display: block;
+    }
+
+    .card {
+      background: var(--cp-surface);
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      box-shadow: 0 0 2px var(--cp-border), 0 1px 2px var(--cp-border);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .card.soft {
+      background: var(--cp-surface-soft);
+    }
+
+    .why {
+      border-left: 4px solid var(--cp-accent);
+    }
+
+    .two-col,
+    .three-col {
+      display: grid;
+      gap: 16px;
+    }
+
+    .two-col {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .three-col {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-accent-soft);
+      color: var(--cp-text);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      margin-bottom: 8px;
+    }
+
+    .route {
+      color: var(--cp-text-muted);
+      margin-bottom: 0;
+    }
+
+    .route strong {
+      color: var(--cp-text);
+    }
+
+    .diagram {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .diagram-top {
+      justify-self: center;
+      text-align: center;
+      border: 1px dashed var(--cp-border-strong);
+      border-radius: 0.625rem;
+      padding: 12px 20px;
+      min-width: 220px;
+      background: var(--cp-surface);
+    }
+
+    .diagram-lanes {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      position: relative;
+    }
+
+    .lane {
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: var(--cp-bg-elevated);
+      padding: 16px;
+    }
+
+    .lane h3 {
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .editable-list {
+      display: grid;
+      gap: 8px;
+      padding: 0;
+      margin: 10px 0 0;
+      list-style: none;
+    }
+
+    .editable-list li {
+      border: 1px dashed var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-surface);
+      padding: 8px 10px;
+      min-height: 36px;
+    }
+
+    .editable-list li:focus {
+      outline: 2px solid var(--cp-accent);
+      border-color: var(--cp-accent);
+    }
+
+    .prompt-card {
+      display: grid;
+      gap: 12px;
+    }
+
+    pre {
+      overflow: auto;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-bg-elevated);
+      color: var(--cp-text);
+      padding: 14px;
+      white-space: pre-wrap;
+      font-family: Consolas, "Courier New", Courier, monospace;
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .copy-status {
+      color: var(--cp-success);
+      font-size: 0.82rem;
+      min-height: 1.25rem;
+    }
+
+    .checklist {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 10px;
+    }
+
+    .checklist li {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 8px;
+      align-items: start;
+    }
+
+    .check {
+      width: 22px;
+      height: 22px;
+      border: 1px solid var(--cp-accent);
+      border-radius: 0.625rem;
+      background: var(--cp-accent-soft);
+      display: inline-grid;
+      place-items: center;
+      color: var(--cp-accent);
+      font-weight: 800;
+      margin-top: 1px;
+    }
+
+    .timeline {
+      counter-reset: hill;
+      display: grid;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .timeline-item {
+      counter-increment: hill;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: var(--cp-bg-elevated);
+      padding: 16px;
+    }
+
+    .timeline-item::before {
+      content: counter(hill);
+      display: inline-grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 0.625rem;
+      background: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      font-weight: 800;
+      margin-right: 8px;
+    }
+
+    .footer-note {
+      color: var(--cp-text-muted);
+      margin: 28px 0 0;
+      text-align: center;
+    }
+
+    @media (max-width: 900px) {
+      .hero,
+      .main-grid,
+      .two-col,
+      .three-col,
+      .diagram-lanes {
+        grid-template-columns: 1fr;
+      }
+
+      .rail {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="hero">
+      <div class="hero-copy panel">
+        <p class="eyebrow">Cowork Chief of Staff Builder</p>
+        <h1>Build a CIO operating system, not another chatbot.</h1>
+        <p class="lede">This page walks a CIO through the first working session: write the Chief of Staff constitution, choose the first jobs, and install the daily operating rhythm in Cowork. Each prompt is copy-ready and uses placeholders that can be customized before pasting.</p>
+        <div class="hero-actions">
+          <button class="btn primary" data-jump="constitution">Start with Step 1</button>
+          <button class="btn" data-jump="model">Edit the operating model</button>
+        </div>
+      </div>
+
+      <aside class="customizer panel" aria-label="Prompt placeholder editor">
+        <p class="eyebrow">Customize once</p>
+        <h2>Your CIO context</h2>
+        <div class="field-grid">
+          <label>CIO name
+            <input data-var="cioName" value="[CIO_NAME]">
+          </label>
+          <label>Company / organization
+            <input data-var="company" value="[COMPANY]">
+          </label>
+          <label>Top business priorities
+            <textarea data-var="priorities">[TOP_3_TO_5_BUSINESS_PRIORITIES]</textarea>
+          </label>
+          <label>Critical customer / executive stakeholders
+            <textarea data-var="stakeholders">[CUSTOMERS_EXECUTIVES_BOARD_MEMBERS_PARTNERS]</textarea>
+          </label>
+          <label>Decision rights and guardrails
+            <textarea data-var="guardrails">[WHAT_COWORK_CAN_PREPARE_VERSUS_WHAT_REQUIRES_CIO_APPROVAL]</textarea>
+          </label>
+        </div>
+        <p class="hint">Change these fields and every prompt updates automatically. The placeholders remain visible if the CIO wants to fill them in later.</p>
+      </aside>
+    </section>
+
+    <section class="main-grid">
+      <nav class="rail panel" aria-label="Steps">
+        <button class="tab active" data-stage="model">Operating model<small>Understand, Watch, Act</small></button>
+        <button class="tab" data-stage="constitution">1. Constitution<small>Define the Chief of Staff role</small></button>
+        <button class="tab" data-stage="jobs">2. Pick first jobs<small>Choose what Cowork owns first</small></button>
+        <button class="tab" data-stage="rhythm">3. Install rhythm<small>Make the system repeatable</small></button>
+        <button class="tab" data-stage="hillclimb">Hill climb<small>Improve weekly without boiling the ocean</small></button>
+      </nav>
+
+      <main>
+        <section id="model" class="stage active" aria-labelledby="model-title">
+          <div class="card">
+            <span class="tag">Mindset</span>
+            <h2 id="model-title">The operating system Cowork should become</h2>
+            <p>Cowork acts as the Chief of Staff when it can understand context, watch for commitments and risk, then act by preparing briefs, drafts, and recommendations. The CIO stays in control of judgment calls and external commitments.</p>
+            <p class="route"><strong>Where to go in Cowork:</strong> start in a dedicated Cowork thread named <strong>Chief of Staff OS</strong>. Use Work IQ for context, Automations for recurring watch loops, and Skills for repeatable outputs such as briefs and follow-ups.</p>
+            <div class="diagram" aria-label="Chief of Staff operating model">
+              <div class="diagram-top">
+                <strong contenteditable="true">AI Chief of Staff</strong><br>
+                <span contenteditable="true">Cowork</span>
+              </div>
+              <div class="diagram-lanes">
+                <div class="lane">
+                  <h3 contenteditable="true">Understand</h3>
+                  <p contenteditable="true">Work IQ</p>
+                  <ul class="editable-list" aria-label="Understand sources">
+                    <li contenteditable="true">Email / Teams</li>
+                    <li contenteditable="true">Calendar</li>
+                    <li contenteditable="true">Meetings</li>
+                    <li contenteditable="true">Files</li>
+                    <li contenteditable="true">People</li>
+                  </ul>
+                </div>
+                <div class="lane">
+                  <h3 contenteditable="true">Watch</h3>
+                  <p contenteditable="true">Automations</p>
+                  <ul class="editable-list" aria-label="Watch rhythms">
+                    <li contenteditable="true">Morning</li>
+                    <li contenteditable="true">Before meetings</li>
+                    <li contenteditable="true">After meetings</li>
+                    <li contenteditable="true">End of day</li>
+                    <li contenteditable="true">Weekly</li>
+                  </ul>
+                </div>
+                <div class="lane">
+                  <h3 contenteditable="true">Act</h3>
+                  <p contenteditable="true">Skills</p>
+                  <ul class="editable-list" aria-label="Act outputs">
+                    <li contenteditable="true">Meeting prep</li>
+                    <li contenteditable="true">Follow-ups</li>
+                    <li contenteditable="true">Email triage</li>
+                    <li contenteditable="true">Account briefs</li>
+                    <li contenteditable="true">Leadership update</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <p class="hint">Every item in the diagram is editable. Click any label or list item to tailor the operating model for a specific CIO.</p>
+          </div>
+        </section>
+
+        <section id="constitution" class="stage" aria-labelledby="constitution-title">
+          <div class="card why">
+            <span class="tag">Step 1</span>
+            <h2 id="constitution-title">Writing the Chief of Staff Constitution</h2>
+            <p>The constitution is the system prompt for the CIO's operating system. It tells Cowork what to optimize for, how to make tradeoffs, when to be candid, and where it must stop and ask for approval. Without this, Cowork will summarize activity. With it, Cowork can recommend action.</p>
+            <p class="route"><strong>Where to go in Cowork:</strong> open Cowork, create a new chat, name it <strong>Chief of Staff OS</strong>, paste the prompt below, and ask Cowork to confirm how it will operate.</p>
+          </div>
+
+          <article class="card prompt-card">
+            <div>
+              <span class="tag">Copy into Cowork</span>
+              <h3>Prompt 1A: Install the constitution</h3>
+              <p class="hint">Why it matters: this establishes Cowork as an executive operating partner, not a passive summarizer.</p>
+            </div>
+            <pre data-template="constitutionPrompt"></pre>
+            <div class="prompt-actions">
+              <button class="btn primary copy-btn">Copy prompt</button>
+              <span class="copy-status" aria-live="polite"></span>
+            </div>
+          </article>
+
+          <article class="card prompt-card">
+            <div>
+              <span class="tag">Optional hardening</span>
+              <h3>Prompt 1B: Ask Cowork to challenge the constitution</h3>
+              <p class="hint">Why it matters: strong operating systems need explicit gaps, escalation rules, and definitions of success.</p>
+            </div>
+            <pre data-template="challengePrompt"></pre>
+            <div class="prompt-actions">
+              <button class="btn primary copy-btn">Copy prompt</button>
+              <span class="copy-status" aria-live="polite"></span>
+            </div>
+          </article>
+        </section>
+
+        <section id="jobs" class="stage" aria-labelledby="jobs-title">
+          <div class="card why">
+            <span class="tag">Step 2</span>
+            <h2 id="jobs-title">Pick the first jobs Cowork should own</h2>
+            <p>Do not ask Cowork to run the whole office on day one. Choose a few recurring, high-leverage jobs that create trust quickly: controlling the day, preparing for important meetings, and making sure follow-through happens.</p>
+            <p class="route"><strong>Where to go in Cowork:</strong> stay in the <strong>Chief of Staff OS</strong> thread. Paste each job prompt one at a time. Ask Cowork what information or permissions it needs before making the job recurring.</p>
+          </div>
+
+          <div class="three-col">
+            <div class="card soft">
+              <h3>A. Control my day</h3>
+              <p>Turns calendar, messages, commitments, and risk into a morning executive brief.</p>
+            </div>
+            <div class="card soft">
+              <h3>B. Own meeting preparation</h3>
+              <p>Creates the pre-read chain: calendar, prior meetings, recent messages, documents, commitments, issues, and recommended outcomes.</p>
+            </div>
+            <div class="card soft">
+              <h3>C. Own meeting follow-through</h3>
+              <p>Extracts decisions, promises, owners, dates, draft emails, and next meetings after significant interactions.</p>
+            </div>
+          </div>
+
+          <article class="card prompt-card">
+            <div>
+              <span class="tag">Job A</span>
+              <h3>Prompt 2A: Control my day</h3>
+              <p class="hint">Why it matters: it converts Cowork from search into executive prioritization.</p>
+            </div>
+            <pre data-template="controlDayPrompt"></pre>
+            <div class="prompt-actions">
+              <button class="btn primary copy-btn">Copy prompt</button>
+              <span class="copy-status" aria-live="polite"></span>
+            </div>
+          </article>
+
+          <article class="card prompt-card">
+            <div>
+              <span class="tag">Job B</span>
+              <h3>Prompt 2B: Own meeting preparation</h3>
+              <p class="hint">Why it matters: it makes every important meeting outcome-driven instead of agenda-driven.</p>
+            </div>
+            <pre data-template="meetingPrepPrompt"></pre>
+            <div class="prompt-actions">
+              <button class="btn primary copy-btn">Copy prompt</button>
+              <span class="copy-status" aria-live="polite"></span>
+            </div>
+          </article>
+
+          <article class="card prompt-card">
+            <div>
+              <span class="tag">Job C</span>
+              <h3>Prompt 2C: Own meeting follow-through</h3>
+              <p class="hint">Why it matters: executive leverage comes from promises kept, decisions captured, and loose ends closed.</p>
+            </div>
+            <pre data-template="followThroughPrompt"></pre>
+            <div class="prompt-actions">
+              <button class="btn primary copy-btn">Copy prompt</button>
+              <span class="copy-status" aria-live="polite"></span>
+            </div>
+          </article>
+        </section>
+
+        <section id="rhythm" class="stage" aria-labelledby="rhythm-title">
+          <div class="card why">
+            <span class="tag">Step 3</span>
+            <h2 id="rhythm-title">Install the first operating rhythm</h2>
+            <p>The first meeting should end with a repeatable loop, not just good prompts. Convert the jobs into a daily and meeting-based rhythm so Cowork watches for the right things at the right time.</p>
+            <p class="route"><strong>Where to go in Cowork:</strong> use Cowork's automation or recurring workflow area for scheduled watch loops. Use the Chief of Staff OS thread as the home base and save the best prompts as reusable skills or templates when available.</p>
+          </div>
+
+          <div class="two-col">
+            <div class="card">
+              <h3>First operating rhythm</h3>
+              <ul class="checklist">
+                <li><span class="check">✓</span><span><strong>Morning:</strong> produce the executive day brief before the CIO starts work.</span></li>
+                <li><span class="check">✓</span><span><strong>Before important meetings:</strong> prepare context, risks, outcomes, and likely decisions.</span></li>
+                <li><span class="check">✓</span><span><strong>After important meetings:</strong> capture promises, owners, dates, and draft follow-ups.</span></li>
+                <li><span class="check">✓</span><span><strong>End of day:</strong> identify unresolved items, missed replies, and tomorrow's landmines.</span></li>
+                <li><span class="check">✓</span><span><strong>Weekly:</strong> review what Cowork missed and refine the constitution.</span></li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Human approval rules</h3>
+              <p>Cowork can prepare, prioritize, recommend, and draft. The CIO approves external communication, customer meeting changes, executive commitments, sensitive escalations, and anything that changes ownership or accountability.</p>
+            </div>
+          </div>
+
+          <article class="card prompt-card">
+            <div>
+              <span class="tag">Make it recurring</span>
+              <h3>Prompt 3A: Create the morning operating rhythm</h3>
+              <p class="hint">Why it matters: this is the first watch loop that makes the Chief of Staff useful every day.</p>
+            </div>
+            <pre data-template="morningAutomationPrompt"></pre>
+            <div class="prompt-actions">
+              <button class="btn primary copy-btn">Copy prompt</button>
+              <span class="copy-status" aria-live="polite"></span>
+            </div>
+          </article>
+
+          <article class="card prompt-card">
+            <div>
+              <span class="tag">Meeting loop</span>
+              <h3>Prompt 3B: Create before-and-after meeting triggers</h3>
+              <p class="hint">Why it matters: the CIO's highest leverage moments are usually before, during, and after critical meetings.</p>
+            </div>
+            <pre data-template="meetingRhythmPrompt"></pre>
+            <div class="prompt-actions">
+              <button class="btn primary copy-btn">Copy prompt</button>
+              <span class="copy-status" aria-live="polite"></span>
+            </div>
+          </article>
+
+          <article class="card prompt-card">
+            <div>
+              <span class="tag">Validation</span>
+              <h3>Prompt 3C: Run the first test on tomorrow's calendar</h3>
+              <p class="hint">Why it matters: a good operating system should expose missing access, bad assumptions, and weak prompts immediately.</p>
+            </div>
+            <pre data-template="testRunPrompt"></pre>
+            <div class="prompt-actions">
+              <button class="btn primary copy-btn">Copy prompt</button>
+              <span class="copy-status" aria-live="polite"></span>
+            </div>
+          </article>
+        </section>
+
+        <section id="hillclimb" class="stage" aria-labelledby="hillclimb-title">
+          <div class="card">
+            <span class="tag">Improve the OS</span>
+            <h2 id="hillclimb-title">Hill climb from useful to indispensable</h2>
+            <p>The goal is not to design the perfect Chief of Staff up front. The goal is to run one loop, learn what was wrong, tighten the constitution, and add the next job only when the first jobs are reliable.</p>
+            <div class="timeline">
+              <div class="timeline-item"><strong>Week 1:</strong> run the morning brief and two meeting briefs. Track what Cowork caught, missed, and over-prioritized.</div>
+              <div class="timeline-item"><strong>Week 2:</strong> add follow-through automation for significant meetings and calibrate what counts as significant.</div>
+              <div class="timeline-item"><strong>Week 3:</strong> add executive stakeholder and customer commitment tracking.</div>
+              <div class="timeline-item"><strong>Week 4:</strong> add leadership update drafting and weekly risk review.</div>
+            </div>
+          </div>
+
+          <article class="card prompt-card">
+            <div>
+              <span class="tag">Weekly refinement</span>
+              <h3>Prompt 4A: Improve the Chief of Staff OS</h3>
+              <p class="hint">Why it matters: every week should make the system sharper, more candid, and more aligned to the CIO's real operating model.</p>
+            </div>
+            <pre data-template="weeklyRefinementPrompt"></pre>
+            <div class="prompt-actions">
+              <button class="btn primary copy-btn">Copy prompt</button>
+              <span class="copy-status" aria-live="polite"></span>
+            </div>
+          </article>
+        </section>
+      </main>
+    </section>
+
+    <p class="footer-note">Use this in the first CIO meeting to complete Steps 1, 2, and 3. Treat the Hill Climb section as the follow-on adoption plan.</p>
+  </div>
+
+  <script>
+    const state = {
+      cioName: "[CIO_NAME]",
+      company: "[COMPANY]",
+      priorities: "[TOP_3_TO_5_BUSINESS_PRIORITIES]",
+      stakeholders: "[CUSTOMERS_EXECUTIVES_BOARD_MEMBERS_PARTNERS]",
+      guardrails: "[WHAT_COWORK_CAN_PREPARE_VERSUS_WHAT_REQUIRES_CIO_APPROVAL]"
+    };
+
+    const templates = {
+      constitutionPrompt: () => `You are my Chief of Staff for ${state.cioName}, CIO of ${state.company}.
+
+Your responsibility is to help me stay focused on the highest-value work, especially customer commitments, customer meetings, executive engagements, commitments I have made to other people, and the business priorities below:
+
+${state.priorities}
+
+Continually help me understand:
+- What needs my attention?
+- What have I committed to?
+- What am I waiting on from someone else?
+- What meetings do I need to prepare for?
+- What important messages have I not answered?
+- What deadlines or commitments are at risk?
+- What decisions do I need to make?
+- What can you prepare or handle for me?
+
+Prioritize customer-facing work, executive commitments, material business risk, and stakeholder trust over ordinary internal activity when appropriate.
+
+Key stakeholders to watch:
+${state.stakeholders}
+
+Be candid. If you believe I am dropping something, tell me directly.
+
+Do not just summarize information. Tell me what you recommend I do.
+
+For important items, always give me:
+- Why it matters
+- What I need to do
+- Who is involved
+- When it matters
+- Your recommended next action
+- The consequence of doing nothing
+
+Guardrails:
+${state.guardrails}
+
+Never send an external communication, change an important customer meeting, make a consequential commitment, escalate a sensitive issue, or represent my decision without my approval.
+
+When you are uncertain, say what you know, what you do not know, and the fastest way to close the gap.
+
+Confirm that you understand this constitution and tell me how you will operate as my Chief of Staff.`,
+
+      challengePrompt: () => `Review the Chief of Staff constitution we just created for ${state.cioName}.
+
+Pressure-test it like an experienced executive operator. Identify:
+1. Ambiguous instructions that could lead you to overstep.
+2. Missing approval rules.
+3. Missing data sources you need from Work IQ, email, Teams, calendar, meetings, files, or people.
+4. The three highest-value jobs you should own first.
+5. The first recurring rhythm we should install in Cowork.
+6. The situations where you should interrupt me versus wait for the next brief.
+
+Return a tightened version of the constitution and a short operating checklist I can approve.`,
+
+      controlDayPrompt: () => `Use the Chief of Staff constitution for ${state.cioName}.
+
+Job: Control my day.
+
+Every morning, review my calendar, recent email and Teams activity, meeting history, commitments, and known stakeholder priorities. Produce a CIO daily brief with these sections:
+
+TODAY
+- Must do
+- Commitments
+- Important replies
+- Critical prep
+- Decisions
+
+MEETINGS
+For each important meeting:
+- Why I am in it
+- Desired outcome
+- What I need to know
+- Anything I promised previously
+- Recommended stance or decision
+
+PEOPLE
+- People I owe something to
+- People who owe me something
+- Stakeholders I should proactively touch
+
+RISKS
+- Anything slipping
+- Customer dissatisfaction
+- Deadlines
+- Unresolved requests
+- Decisions blocked by me
+
+RECOMMENDED FOCUS
+Give me the three things I should accomplish today and explain why those three matter most.
+
+Use this prioritization order unless I tell you otherwise:
+1. Customer or external commitments.
+2. Executive, board, or regulator commitments.
+3. Business-critical risk or delivery blockers.
+4. My direct commitments to people.
+5. Ordinary internal activity.
+
+If information is missing, state the assumption and the fastest way to validate it.`,
+
+      meetingPrepPrompt: () => `Use the Chief of Staff constitution for ${state.cioName}.
+
+Job: Own meeting preparation.
+
+For every important customer, executive, board, partner, or high-risk internal meeting, build a Chief of Staff Brief by pulling together:
+
+Calendar invitation
+↓
+Previous meeting notes or transcript
+↓
+Recent emails
+↓
+Recent Teams conversations
+↓
+Relevant account, project, or initiative documents
+↓
+Open commitments
+↓
+Customer or stakeholder issues
+↓
+Chief of Staff Brief
+
+For the brief, include:
+- Meeting purpose
+- Why I am in the meeting
+- The desired outcome
+- Who is attending and what they likely care about
+- What has happened since the last interaction
+- Open commitments by owner
+- Risks, sensitivities, or relationship issues
+- Decisions I may need to make
+- Questions I should ask
+- Recommended talking points
+- Recommended next action after the meeting
+
+Use placeholders if a source is unavailable, but call out what is missing and why it matters.`,
+
+      followThroughPrompt: () => `Use the Chief of Staff constitution for ${state.cioName}.
+
+Job: Own meeting follow-through.
+
+After significant meetings, determine:
+- What was decided?
+- What did I promise?
+- What did others promise?
+- Who owns each action?
+- Is there a date?
+- Does someone need an email?
+- Does another meeting need to happen?
+- Is there a risk, blocker, or escalation?
+- What should be tracked until closed?
+
+Return:
+1. Executive summary.
+2. Decisions made.
+3. Action register with owner, due date, and next step.
+4. Draft follow-up email or Teams message for my approval.
+5. Suggested calendar holds or next meetings.
+6. Any open questions you need me to answer.
+
+Do not send anything or create commitments without my explicit approval.`,
+
+      morningAutomationPrompt: () => `Help me convert the "Control my day" job into a recurring Cowork operating rhythm.
+
+Context:
+- CIO: ${state.cioName}
+- Organization: ${state.company}
+- Priorities: ${state.priorities}
+- Critical stakeholders: ${state.stakeholders}
+
+Design the morning brief automation:
+- When it should run
+- What sources it should review
+- What qualifies as important
+- What output format it should use
+- When it should interrupt me versus wait
+- What it should never do without approval
+- How I should give feedback to improve it
+
+Then produce the exact recurring prompt I should use in Cowork for the morning Chief of Staff brief.`,
+
+      meetingRhythmPrompt: () => `Help me create before-and-after meeting triggers for my Chief of Staff OS.
+
+For before-meeting preparation:
+- Identify which meetings qualify as important.
+- Decide how far in advance Cowork should prepare the brief.
+- Define what sources to review.
+- Define the brief format.
+
+For after-meeting follow-through:
+- Identify which meetings require follow-through.
+- Define how soon Cowork should produce the action register.
+- Define when a draft email, Teams message, or next meeting should be recommended.
+- Define what requires my approval.
+
+Return two reusable Cowork prompts:
+1. Before-meeting Chief of Staff Brief.
+2. After-meeting follow-through brief.`,
+
+      testRunPrompt: () => `Run a first test of the Chief of Staff OS against my next business day.
+
+Use the constitution and the jobs we selected:
+1. Control my day.
+2. Own meeting preparation.
+3. Own meeting follow-through.
+
+Review tomorrow's calendar and recent relevant context. Return:
+- What the morning brief would look like.
+- Which meetings should receive preparation briefs.
+- Which meetings are likely to need follow-through.
+- What data or permissions appear to be missing.
+- What part of the constitution needs clarification.
+- The first three improvements you recommend before we make this recurring.`,
+
+      weeklyRefinementPrompt: () => `Act as my Chief of Staff OS coach.
+
+Review the last week of briefs, meeting preparation, follow-through, commitments, and my feedback.
+
+Tell me:
+1. What you caught that was valuable.
+2. What you missed.
+3. Where you over-prioritized or under-prioritized.
+4. Which stakeholders, meetings, or commitments need more attention.
+5. What should change in the Chief of Staff constitution.
+6. What new job should be added next, if any.
+7. What job should not be added yet because the OS is not ready.
+
+Return the updated constitution, updated operating rhythm, and the single next hill-climb improvement.`
+    };
+
+    function renderPrompts() {
+      document.querySelectorAll("[data-template]").forEach((node) => {
+        const key = node.dataset.template;
+        node.textContent = templates[key]();
+      });
+    }
+
+    function setStage(stageId) {
+      document.querySelectorAll(".stage").forEach((section) => {
+        section.classList.toggle("active", section.id === stageId);
+      });
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.classList.toggle("active", tab.dataset.stage === stageId);
+      });
+      document.getElementById(stageId).scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    document.querySelectorAll("[data-var]").forEach((input) => {
+      input.addEventListener("input", (event) => {
+        state[event.target.dataset.var] = event.target.value || event.target.placeholder || "";
+        renderPrompts();
+      });
+    });
+
+    document.querySelectorAll("[data-stage]").forEach((button) => {
+      button.addEventListener("click", () => setStage(button.dataset.stage));
+    });
+
+    document.querySelectorAll("[data-jump]").forEach((button) => {
+      button.addEventListener("click", () => setStage(button.dataset.jump));
+    });
+
+    document.querySelectorAll(".copy-btn").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const card = button.closest(".prompt-card");
+        const text = card.querySelector("pre").textContent;
+        const status = card.querySelector(".copy-status");
+        try {
+          await navigator.clipboard.writeText(text);
+          status.textContent = "Copied.";
+        } catch {
+          const range = document.createRange();
+          range.selectNodeContents(card.querySelector("pre"));
+          const selection = window.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+          status.textContent = "Selected. Press Ctrl+C to copy.";
+        }
+        setTimeout(() => {
+          status.textContent = "";
+        }, 2400);
+      });
+    });
+
+    renderPrompts();
+  </script>
+</body>
+</html>
