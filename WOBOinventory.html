@@ -190,6 +190,14 @@ const CART_EMAIL = 'TheCrew@WOBO.store';
 const CART_SUBJECT = 'Hat Selection for order';
 const CART_KEY = 'woboCustomHatsCart';
 const PRICING_KEY = 'woboHatPricingRange';
+const DEFAULT_PRICING_RANGE = '24 - 499 Hats';
+const PRICING_ADJUSTMENTS = {
+  '1 - 3 Hats': 8,
+  '4 - 11 Hats': 6,
+  '12 - 23 Hats': 2,
+  '24 - 499 Hats': 0,
+  '500 or more Hats': -2
+};
 const pricingCallout = document.getElementById('pricingCallout');
 const pricingPills = document.getElementById('pricingPills');
 const pricingHelper = document.getElementById('pricingHelper');
@@ -199,7 +207,8 @@ const toggleCart = document.getElementById('toggleCart');
 const emailCart = document.getElementById('emailCart');
 const clearCart = document.getElementById('clearCart');
 let cart = loadCart();
-let selectedPricingRange = localStorage.getItem(PRICING_KEY) || '';
+let selectedPricingRange = localStorage.getItem(PRICING_KEY) || DEFAULT_PRICING_RANGE;
+if (!(selectedPricingRange in PRICING_ADJUSTMENTS)) selectedPricingRange = DEFAULT_PRICING_RANGE;
 const IMG_PLACEHOLDER = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%22120%22 viewBox=%220 0 120 120%22%3E%3Crect width=%22120%22 height=%22120%22 fill=%22%23f5f5f5%22/%3E%3C/svg%3E';
 const imageObserver = 'IntersectionObserver' in window ? new IntersectionObserver((entries) => {
   entries.forEach(entry => {
@@ -255,6 +264,8 @@ pricingPills.querySelectorAll('.pricing-pill').forEach(button => {
     selectedPricingRange = button.dataset.pricingRange || '';
     localStorage.setItem(PRICING_KEY, selectedPricingRange);
     renderPricingPills();
+    updateCartPanel();
+    renderDetail();
   });
 });
 function brandModels(name) {
@@ -283,12 +294,23 @@ function swatches(hexColors) { return `<div class="swatches">${(hexColors || [])
 function gallery(images, name) { return `<div class="gallery">${(images || []).map((img, i) => `<a class="gallery-thumb ${i === 0 ? 'active' : ''}" href="${esc(img.zoom || img.large || img.thumb)}" data-large="${esc(img.large || img.zoom || img.thumb)}" data-zoom="${esc(img.zoom || img.large || img.thumb)}">${lazyImg(img.thumb || img.large || img.zoom, `${name} view ${i+1}`)}</a>`).join('')}</div>`; }
 function inventoryDisplay(c) { return c.inventory <= 0 ? '<strong class="out-of-stock">Out of Stock</strong>' : `<strong>${esc(c.inventoryHtml || c.inventory)}</strong>`; }
 function numericPrice(value) { return Number(String(value ?? '').replace(/[^0-9.]/g, '')) || 0; }
-function displayPrice(item) {
+function basePrice(item) {
   const sale = item.salePrice;
   const regular = item.regPrice;
   if (numericPrice(sale) > 0) return sale;
   if (numericPrice(regular) > 0) return regular;
   return '';
+}
+function adjustedPrice(price) {
+  const base = numericPrice(price);
+  if (!base) return '';
+  const adjusted = Math.max(0, base + (PRICING_ADJUSTMENTS[selectedPricingRange] ?? 0));
+  return `$${adjusted.toFixed(2)}`;
+}
+function displayPrice(item) { return adjustedPrice(basePrice(item)); }
+function cartDisplayPrice(item) {
+  const color = findCartColor(item);
+  return color ? displayPrice(color) : adjustedPrice(item.basePrice || item.price) || item.price || '';
 }
 function loadCart() {
   try { return JSON.parse(localStorage.getItem(CART_KEY) || '{}'); }
@@ -314,7 +336,9 @@ function setCartItem(model, color, qty) {
       color: color.description,
       colorCode: color.colorCode,
       qty: count,
+      basePrice: basePrice(color),
       price: displayPrice(color),
+      pricingRange: selectedPricingRange,
       image: color.mainImage || color.zoomImage || '',
       zoomImage: color.zoomImage || color.mainImage || '',
       itemNumbers: (color.items || []).map(item => item.itemNumber).filter(Boolean).join(', ')
@@ -334,7 +358,7 @@ function updateCartPanel() {
   const rows = cartRows();
   const units = rows.reduce((sum, item) => sum + Number(item.qty || 0), 0);
   cartSummary.textContent = rows.length ? `${fmt(units)} total hats` : 'Quote cart is empty';
-  cartDetails.innerHTML = rows.length ? `<table><thead><tr><th>Image</th><th>Qty</th><th>Brand</th><th>Model</th><th>Color</th><th>Price</th><th></th></tr></thead><tbody>${rows.map(item => `<tr><td>${cartImage(item) ? lazyImg(cartImage(item), `${item.model} ${item.color}`, 'cart-thumb') : ''}</td><td><strong>${fmt(item.qty)}</strong></td><td>${esc(item.brand)}</td><td>${esc(item.model)}<br><span class="rowmeta">${esc(item.modelName)}</span></td><td>${esc(item.color)}<br><span class="rowmeta">${esc(item.colorCode)}${item.itemNumbers ? ` · ${esc(item.itemNumbers)}` : ''}</span></td><td>${esc(item.price)}</td><td><button class="cart-secondary remove-cart-item" type="button" data-key="${esc(item.key)}">Remove</button></td></tr>`).join('')}</tbody></table>` : '<div class="cart-empty">No items added yet.</div>';
+  cartDetails.innerHTML = rows.length ? `<table><thead><tr><th>Image</th><th>Qty</th><th>Brand</th><th>Model</th><th>Color</th><th>Price</th><th></th></tr></thead><tbody>${rows.map(item => `<tr><td>${cartImage(item) ? lazyImg(cartImage(item), `${item.model} ${item.color}`, 'cart-thumb') : ''}</td><td><strong>${fmt(item.qty)}</strong></td><td>${esc(item.brand)}</td><td>${esc(item.model)}<br><span class="rowmeta">${esc(item.modelName)}</span></td><td>${esc(item.color)}<br><span class="rowmeta">${esc(item.colorCode)}${item.itemNumbers ? ` · ${esc(item.itemNumbers)}` : ''}</span></td><td>${esc(cartDisplayPrice(item))}</td><td><button class="cart-secondary remove-cart-item" type="button" data-key="${esc(item.key)}">Remove</button></td></tr>`).join('')}</tbody></table>` : '<div class="cart-empty">No items added yet.</div>';
   initLazyImages(cartDetails);
   cartDetails.querySelectorAll('.remove-cart-item').forEach(button => button.addEventListener('click', () => {
     delete cart[button.dataset.key];
@@ -350,7 +374,7 @@ function cartEmailBody(rows, includeImageLinks = true) {
     `Model: ${item.model} - ${item.modelName}`,
     `Color: ${item.colorCode} - ${item.color}`,
     `Model/Color: ${item.model}-${item.colorCode}`,
-    `Price with Leather Patch: ${item.price}`,
+    `Price with Leather Patch: ${cartDisplayPrice(item)}`,
     includeImageLinks ? `Image: ${cartImage(item)}` : '',
     item.itemNumbers ? `Item number: ${item.itemNumbers}` : ''
   ].filter(Boolean).join('\n'));
