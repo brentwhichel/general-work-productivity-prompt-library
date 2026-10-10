@@ -335,6 +335,28 @@ function pricingRangeMatchesUnits(units) {
   if (selectedPricingRange === '500 or more Hats') return units >= 500;
   return false;
 }
+function pricingRangeForUnits(units) {
+  if (units >= 500) return '500 or more Hats';
+  if (units >= 24) return '24 - 499 Hats';
+  if (units >= 12) return '12 - 23 Hats';
+  if (units >= 4) return '4 - 11 Hats';
+  if (units >= 1) return '1 - 3 Hats';
+  return '';
+}
+function pricingRangeMax(range) {
+  if (range === '1 - 3 Hats') return 3;
+  if (range === '4 - 11 Hats') return 11;
+  if (range === '12 - 23 Hats') return 23;
+  if (range === '24 - 499 Hats') return 499;
+  return Infinity;
+}
+function autoSelectPricingRangeForUnits(units) {
+  if (!selectedPricingRange || units <= pricingRangeMax(selectedPricingRange)) return false;
+  selectedPricingRange = pricingRangeForUnits(units);
+  localStorage.setItem(PRICING_KEY, selectedPricingRange);
+  renderPricingPills();
+  return true;
+}
 function updateEmailButton(units) {
   const enabled = pricingRangeMatchesUnits(units);
   emailCart.classList.toggle('disabled', !enabled);
@@ -389,8 +411,9 @@ function cartImage(item) {
 function updateCartPanel() {
   const rows = cartRows();
   const units = rows.reduce((sum, item) => sum + Number(item.qty || 0), 0);
+  const rangeChanged = autoSelectPricingRangeForUnits(units);
   const rangeOk = pricingRangeMatchesUnits(units);
-  const rangeMessage = rangeOk ? 'Quantity satisfied for pricing!' : 'Add more hats for the quantity and discount you selected below!';
+  const rangeMessage = rangeOk ? 'Quantity satisfied for pricing!' : 'Quantity does not match selection below';
   const rangeClass = rangeOk ? 'cart-range-ok' : 'cart-range-warn';
   cartSummary.textContent = rows.length ? `${fmt(units)} total hats` : 'No Hats Selected yet';
   updateEmailButton(units);
@@ -402,6 +425,7 @@ function updateCartPanel() {
     saveCart();
     renderDetail();
   }));
+  if (rangeChanged) renderDetail();
 }
 function cartEmailBody(rows, includeImageLinks = true) {
   const units = rows.reduce((sum, item) => sum + Number(item.qty || 0), 0);
