@@ -133,6 +133,7 @@ h1 { margin: 8px 0; font-size: clamp(28px, 4vw, 50px); line-height: 1; }
 .cart-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .cart-button, .cart-secondary { padding: 10px 12px; border: 1px solid var(--cp-accent); border-radius: 0.625rem; background: var(--cp-accent); color: var(--cp-accent-fg); cursor: pointer; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
 .cart-secondary { border-color: var(--cp-border); background: var(--cp-surface-soft); color: var(--cp-text); }
+.cart-button.disabled { border-color: var(--cp-border); background: var(--cp-surface-soft); color: var(--cp-text-muted); cursor: not-allowed; pointer-events: none; }
 .cart-details { grid-column: 1 / -1; display: none; border-top: 1px solid var(--cp-border); padding-top: 12px; }
 .cart-details.open { display: block; }
 .cart-details table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -324,6 +325,23 @@ function money(value) { return `$${Number(value || 0).toFixed(2)}`; }
 function cartTotal(rows) {
   return rows.reduce((sum, item) => sum + (numericPrice(cartDisplayPrice(item)) * Number(item.qty || 0)), 0);
 }
+function pricingRangeMatchesUnits(units) {
+  if (selectedPricingRange === '1 - 3 Hats') return units >= 1 && units <= 3;
+  if (selectedPricingRange === '4 - 11 Hats') return units >= 4 && units <= 11;
+  if (selectedPricingRange === '12 - 23 Hats') return units >= 12 && units <= 23;
+  if (selectedPricingRange === '24 - 499 Hats') return units >= 24 && units <= 499;
+  if (selectedPricingRange === '500 or more Hats') return units >= 500;
+  return false;
+}
+function updateEmailButton(units) {
+  const enabled = pricingRangeMatchesUnits(units);
+  emailCart.classList.toggle('disabled', !enabled);
+  emailCart.setAttribute('aria-disabled', String(!enabled));
+  emailCart.tabIndex = enabled ? 0 : -1;
+  emailCart.title = enabled ? '' : 'Select a quantity range that matches the total hats in your cart before emailing.';
+  if (!enabled) emailCart.href = '#';
+  return enabled;
+}
 function loadCart() {
   try { return JSON.parse(localStorage.getItem(CART_KEY) || '{}'); }
   catch { return {}; }
@@ -370,6 +388,7 @@ function updateCartPanel() {
   const rows = cartRows();
   const units = rows.reduce((sum, item) => sum + Number(item.qty || 0), 0);
   cartSummary.textContent = rows.length ? `${fmt(units)} total hats` : 'No Hats Selected yet';
+  updateEmailButton(units);
   cartDetails.classList.toggle('open', rows.length > 0);
   cartDetails.innerHTML = rows.length ? `<table><thead><tr><th>Image</th><th>Qty</th><th>Brand</th><th>Model</th><th>Color</th><th>Cost per hat</th><th></th></tr></thead><tbody>${rows.map(item => `<tr><td>${cartImage(item) ? lazyImg(cartImage(item), `${item.model} ${item.color}`, 'cart-thumb') : ''}</td><td><strong>${fmt(item.qty)}</strong></td><td>${esc(item.brand)}</td><td>${esc(item.model)}<br><span class="rowmeta">${esc(item.modelName)}</span></td><td>${esc(item.color)}<br><span class="rowmeta">${esc(item.colorCode)}${item.itemNumbers ? ` · ${esc(item.itemNumbers)}` : ''}</span></td><td>${esc(cartDisplayPrice(item))}</td><td><button class="cart-secondary remove-cart-item" type="button" data-key="${esc(item.key)}">Remove</button></td></tr>`).join('')}</tbody><tfoot><tr><td colspan="4"></td><td class="rowmeta cart-total-label" colspan="2">Total below does NOT include taxes and shipping, if applicable.</td><td></td></tr><tr class="cart-total"><td colspan="4"></td><td class="cart-total-label">Sub Total</td><td>${esc(money(cartTotal(rows)))}</td><td></td></tr></tfoot></table>` : '';
   initLazyImages(cartDetails);
@@ -422,10 +441,13 @@ function isMobileDevice() {
   return /iPad|iPhone|iPod|Android/i.test(navigator.userAgent);
 }
 function prepareEmailLink() {
+  const units = cartRows().reduce((sum, item) => sum + Number(item.qty || 0), 0);
+  if (!updateEmailButton(units)) return;
   emailCart.href = isMobileDevice() ? cartOutlookHref() : cartMailtoHref();
 }
 function emailCartList(event) {
-  if (!cartRows().length) {
+  const units = cartRows().reduce((sum, item) => sum + Number(item.qty || 0), 0);
+  if (!updateEmailButton(units)) {
     event.preventDefault();
     updateCartPanel();
     return;
