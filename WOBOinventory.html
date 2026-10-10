@@ -138,6 +138,8 @@ h1 { margin: 8px 0; font-size: clamp(28px, 4vw, 50px); line-height: 1; }
 .cart-details table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .cart-details th, .cart-details td { padding: 8px; border-bottom: 1px solid var(--cp-border); text-align: left; vertical-align: top; }
 .cart-details th { color: var(--cp-text-muted); font-weight: 700; }
+.cart-total td { font-size: 15px; font-weight: 800; }
+.cart-total-label { text-align: right; }
 .cart-thumb { width: 64px; height: 64px; object-fit: contain; border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-surface-soft); }
 .cart-empty { color: var(--cp-text-muted); }
 .cart-entry { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: end; }
@@ -318,6 +320,10 @@ function cartDisplayPrice(item) {
   const color = findCartColor(item);
   return color ? displayPrice(color) : adjustedPrice(item.basePrice || item.price) || item.price || '';
 }
+function money(value) { return `$${Number(value || 0).toFixed(2)}`; }
+function cartTotal(rows) {
+  return rows.reduce((sum, item) => sum + (numericPrice(cartDisplayPrice(item)) * Number(item.qty || 0)), 0);
+}
 function loadCart() {
   try { return JSON.parse(localStorage.getItem(CART_KEY) || '{}'); }
   catch { return {}; }
@@ -365,7 +371,7 @@ function updateCartPanel() {
   const units = rows.reduce((sum, item) => sum + Number(item.qty || 0), 0);
   cartSummary.textContent = rows.length ? `${fmt(units)} total hats` : 'No Hats Selected yet';
   cartDetails.classList.toggle('open', rows.length > 0);
-  cartDetails.innerHTML = rows.length ? `<table><thead><tr><th>Image</th><th>Qty</th><th>Brand</th><th>Model</th><th>Color</th><th>Price</th><th></th></tr></thead><tbody>${rows.map(item => `<tr><td>${cartImage(item) ? lazyImg(cartImage(item), `${item.model} ${item.color}`, 'cart-thumb') : ''}</td><td><strong>${fmt(item.qty)}</strong></td><td>${esc(item.brand)}</td><td>${esc(item.model)}<br><span class="rowmeta">${esc(item.modelName)}</span></td><td>${esc(item.color)}<br><span class="rowmeta">${esc(item.colorCode)}${item.itemNumbers ? ` · ${esc(item.itemNumbers)}` : ''}</span></td><td>${esc(cartDisplayPrice(item))}</td><td><button class="cart-secondary remove-cart-item" type="button" data-key="${esc(item.key)}">Remove</button></td></tr>`).join('')}</tbody></table>` : '';
+  cartDetails.innerHTML = rows.length ? `<table><thead><tr><th>Image</th><th>Qty</th><th>Brand</th><th>Model</th><th>Color</th><th>Price</th><th></th></tr></thead><tbody>${rows.map(item => `<tr><td>${cartImage(item) ? lazyImg(cartImage(item), `${item.model} ${item.color}`, 'cart-thumb') : ''}</td><td><strong>${fmt(item.qty)}</strong></td><td>${esc(item.brand)}</td><td>${esc(item.model)}<br><span class="rowmeta">${esc(item.modelName)}</span></td><td>${esc(item.color)}<br><span class="rowmeta">${esc(item.colorCode)}${item.itemNumbers ? ` · ${esc(item.itemNumbers)}` : ''}</span></td><td>${esc(cartDisplayPrice(item))}</td><td><button class="cart-secondary remove-cart-item" type="button" data-key="${esc(item.key)}">Remove</button></td></tr>`).join('')}</tbody><tfoot><tr class="cart-total"><td class="cart-total-label" colspan="5">Cart total</td><td>${esc(money(cartTotal(rows)))}</td><td></td></tr></tfoot></table>` : '';
   initLazyImages(cartDetails);
   cartDetails.querySelectorAll('.remove-cart-item').forEach(button => button.addEventListener('click', () => {
     delete cart[button.dataset.key];
